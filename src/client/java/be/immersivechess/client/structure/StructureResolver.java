@@ -13,6 +13,7 @@ import net.minecraft.resource.LifecycledResourceManagerImpl;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.structure.StructureTemplateManager;
+import net.minecraft.util.path.SymlinkValidationException;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +40,7 @@ public class StructureResolver {
             session.close();
             LifecycledResourceManagerImpl dataResourceManager = new LifecycledResourceManagerImpl(ResourceType.SERVER_DATA, client.getResourcePackManager().createResourcePacks());
             return new StructureTemplateManager(dataResourceManager, session, client.getDataFixer(), Registries.BLOCK.getReadOnlyWrapper());
-        } catch (IOException e) {
+        } catch (IOException | SymlinkValidationException e) {
             throw new RuntimeException(e);
         }
     }

@@ -17,8 +17,10 @@ import net.minecraft.block.BlockState;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.structure.StructureTemplateManager;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
@@ -116,14 +118,16 @@ public class Items {
     }
 
     // Item Groups
-    public static final ItemGroup IC_GROUP = register(FabricItemGroup.builder(new Identifier(ImmersiveChess.MOD_ID, "immersivechess"))
-            .icon(() -> new ItemStack(CHESS_CASE))
-            .build());
+    public static final ItemGroup IC_GROUP = register(
+            new Identifier(ImmersiveChess.MOD_ID, "immersivechess"),
+            FabricItemGroup.builder()
+                    .icon(() -> new ItemStack(CHESS_CASE))
+                    .displayName(Text.translatable(new Identifier(ImmersiveChess.MOD_ID, "immersivechess").toTranslationKey()))
+                    .build()
+    );
 
-    private static ItemGroup register(ItemGroup itemGroup) {
-        return itemGroup;
-        // TODO: register IC_GROUP in 1.20
-//        return Registry.register(Registries.ITEM_GROUP, itemGroup.getId(), itemGroup);
+    private static ItemGroup register(Identifier id, ItemGroup itemGroup) {
+        return Registry.register(Registries.ITEM_GROUP, id, itemGroup);
     }
 
     public static void onInitialize() {
@@ -147,14 +151,14 @@ public class Items {
         });
 
         // also add everything to immersivechess tab
-        ItemGroupEvents.modifyEntriesEvent(IC_GROUP).register(content -> {
+        ItemGroupEvents.modifyEntriesEvent(Registries.ITEM_GROUP.getKey(IC_GROUP).get()).register(content -> {
             content.add(CHESS_CASE);
             PIECE_STRUCTURE_ITEMS.forEach(content::add);
             addStandsToItemGroup(content);
         });
     }
 
-    private static void addStandsToItemGroup(FabricItemGroupEntries content){
+    private static void addStandsToItemGroup(FabricItemGroupEntries content) {
         content.add(BLANK_STAND);
 
         // stands in all colors

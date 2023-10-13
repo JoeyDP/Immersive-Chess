@@ -28,7 +28,7 @@ public class StructureHelper {
 
     public static Map<BlockPos, BlockState> buildBlockStateMap(StructureTemplate structure){
         List<StructureTemplate.StructureBlockInfo> blockInfoList = getBlockInfoList(structure);
-        return blockInfoList.stream().collect(Collectors.toMap(s -> s.pos, s -> s.state));
+        return blockInfoList.stream().collect(Collectors.toMap(s -> s.pos(), s -> s.state()));
     }
 
     public static StructureTemplate rotate(StructureTemplate structure, BlockRotation rotation){
@@ -40,9 +40,9 @@ public class StructureHelper {
         BlockPos offset = structure.offsetByTransformedSize(BlockPos.ORIGIN, BlockMirror.NONE, rotation);
         List<StructureTemplate.StructureBlockInfo> blockInfos2 = Lists.newArrayList();
         for (StructureTemplate.StructureBlockInfo structureBlockInfo : blockInfos) {
-            BlockPos blockPos = StructureTemplate.transform(placementData, structureBlockInfo.pos).add(offset);
-            BlockState blockState = structureBlockInfo.state.rotate(rotation);
-            StructureTemplate.StructureBlockInfo structureBlockInfo2 = new StructureTemplate.StructureBlockInfo(blockPos, blockState, structureBlockInfo.nbt != null ? structureBlockInfo.nbt.copy() : null);
+            BlockPos blockPos = StructureTemplate.transform(placementData, structureBlockInfo.pos()).add(offset);
+            BlockState blockState = structureBlockInfo.state().rotate(rotation);
+            StructureTemplate.StructureBlockInfo structureBlockInfo2 = new StructureTemplate.StructureBlockInfo(blockPos, blockState, structureBlockInfo.nbt() != null ? structureBlockInfo.nbt().copy() : null);
             blockInfos2.add(structureBlockInfo2);
         }
 

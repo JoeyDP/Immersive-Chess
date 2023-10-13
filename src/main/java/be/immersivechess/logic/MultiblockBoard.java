@@ -353,7 +353,8 @@ public class MultiblockBoard {
         if (!nbt.contains(A1_KEY) || !nbt.contains(WHITE_DIRECTION_KEY)) return null;
 
         BlockPos a1 = NbtHelper.toBlockPos(nbt.getCompound(A1_KEY));
-        Direction whitePlayDirection = Direction.fromVector(NbtHelper.toBlockPos(nbt.getCompound(WHITE_DIRECTION_KEY)));
+        Vec3i dir = NbtHelper.toBlockPos(nbt.getCompound(WHITE_DIRECTION_KEY));
+        Direction whitePlayDirection = Direction.fromVector(dir.getX(), dir.getY(), dir.getZ());
 
         return new MultiblockBoard(a1, whitePlayDirection);
     }

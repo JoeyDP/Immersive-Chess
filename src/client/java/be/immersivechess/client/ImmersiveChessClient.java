@@ -29,6 +29,8 @@ import net.minecraft.item.DyeableItem;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.structure.StructureTemplateManager;
 import net.minecraft.util.Identifier;
@@ -72,7 +74,7 @@ public class ImmersiveChessClient implements ClientModInitializer {
             addPieceStands(content);
         });
 
-        ItemGroupEvents.modifyEntriesEvent(Items.IC_GROUP).register(content -> {
+        ItemGroupEvents.modifyEntriesEvent(Registries.ITEM_GROUP.getKey(Items.IC_GROUP).get()).register(content -> {
             addPieceStands(content);
         });
     }
