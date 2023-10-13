@@ -244,9 +244,15 @@ public class PieceModel implements UnbakedModel {
 
             Map<BlockPos, BlockState> blockStates = StructureHelper.buildBlockStateMap(structure);
             BlockRenderView world = createBlockRenderView(worldBlockView, blockStates);
+            BlockModelRenderer.AmbientOcclusionCalculator ambientOcclusionCalculator = new BlockModelRenderer.AmbientOcclusionCalculator();
+
             Renderer renderer = RendererAccess.INSTANCE.getRenderer();
             MeshBuilder builder = renderer.meshBuilder();
             QuadEmitter emitter = builder.getEmitter();
+
+            float[] box = new float[Direction.values().length * 2];
+            BitSet flags = new BitSet(3);
+
 
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
@@ -269,6 +275,68 @@ public class PieceModel implements UnbakedModel {
                     for (BakedQuad quad : model.getQuads(bs, direction, random)) {
                         emitter.fromVanilla(quad, material, null);       //  set cullFace to null because quads are not guaranteed to be on a face (not full block)
 
+
+                        // TODO: respect setting for smooth rendering or not
+                        // TODO: look into using A0Calcculator of Fabric
+
+                        flags.clear();
+                        VanillaAoHelper.updateShape(world, bs, pos, quad.getVertexData(), emitter.lightFace(), box, flags);
+                        ambientOcclusionCalculator.apply(world, bs, pos, quad.getFace(), box, flags, quad.hasShade());
+
+                        for (int i = 0; i < 4; i++) {
+                            int light = ambientOcclusionCalculator.light[i];
+                            float brightness = ambientOcclusionCalculator.brightness[i];
+
+                            // TODO: make blockLight warmer (see LightmapTextureManager)
+
+//                            int blockLight = LightmapTextureManager.getBlockLightCoordinates(light);
+//                            int skyLight = LightmapTextureManager.getSkyLightCoordinates(light);
+
+                            int blockLight = light & 0xFF;
+                            int skyLight = (light >> 16) & 0xFF;
+
+                            // Render actual lightlevel by altering the color
+                            int lightLevel = Math.max(skyLight, blockLight);
+
+                            float lightValue = (float) lightLevel / 0xFF;
+
+                            // TODO: figure out what to do with brightness
+//                            brightness *= lightValue;
+                            brightness = lightValue;
+
+                            int r = (int) (brightness * 0xFF) & 0xFF;
+                            int g = (int) (brightness * 0xFF) & 0xFF;
+                            int b = (int) (brightness * 0xFF) & 0xFF;
+
+                            int c = 0xFF000000 | b << 16 | g << 8 | r;
+                            emitter.color(i, c);
+
+                            emitter.lightmap(i, light);
+                        }
+//
+//                        BlockPos lightPos = pos;
+//                        if (direction != null)
+//                            lightPos = lightPos.offset(direction);
+//
+//                        int lightCoord = WorldRenderer.getLightmapCoordinates(world, bs, lightPos);
+//
+//                        // Blocklight (lighting within piece) is handled by lightmap because the max of this and the computed light is used when rendering
+//                        int blockLight = LightmapTextureManager.getBlockLightCoordinates(lightCoord);
+//                        // Skylight is only used to darken quads with color
+//                        int skyLight = LightmapTextureManager.getSkyLightCoordinates(lightCoord);
+//
+//                        // Render actual lightlevel by altering the color
+//                        int shownLight = Math.max(skyLight, blockLight);
+//
+//                        int b = 0xFF;
+//                        b -= (15 - Math.min(15, shownLight)) * 24;
+//                        int c = 0xFF000000 | b << 16 | b << 8 | b;
+//                        emitter.color(c, c, c, c);
+//
+//                        // as of writing this code, the skylight coordinate of the quad is not used when rendering
+//                        int blockLightCoord = blockLight << 4 | skyLight << 20;
+//                        emitter.lightmap(blockLightCoord, blockLightCoord, blockLightCoord, blockLightCoord);
+
                         translateTransform.transform(emitter);
                         scaleTransform.transform(emitter);
                         rotationTransform.transform(emitter);
@@ -284,6 +352,48 @@ public class PieceModel implements UnbakedModel {
         private BlockRenderView createBlockRenderView(BlockRenderView worldBlockView, Map<BlockPos, BlockState> blockStates) {
             return new BlockRenderView() {
 
+                private final LightingProvider lightingProvider = createLightingProvider();
+
+                private LightingProvider createLightingProvider() {
+                    BlockView view = this;
+                    ChunkProvider chunkProvider = new ChunkProvider() {
+                        @Nullable
+                        @Override
+                        public BlockView getChunk(int chunkX, int chunkZ) {
+//                            ImmersiveChess.LOGGER.info("Fetched chunk " + chunkX + " " + chunkZ);
+                            if (chunkX == 0 && chunkZ == 0)
+                                return view;
+                            return EmptyBlockView.INSTANCE;
+                        }
+
+                        @Override
+                        public BlockView getWorld() {
+                            return view;
+                        }
+                    };
+
+                    // TODO: run on different thread?
+
+                    // always use skylight, because this would have to depend on where the piece is built and we don't store this info.
+                    LightingProvider p = new LightingProvider(chunkProvider, true, true);
+
+                    // enable light updates for the chunk
+                    p.setSectionStatus(new BlockPos(0, 0, 0), false);
+                    p.setColumnEnabled(new ChunkPos(0, 0), true);
+
+                    // enable adjacent chunk columns for propper skylight propagation
+                    p.setColumnEnabled(new ChunkPos(-1, 0), true);
+                    p.setColumnEnabled(new ChunkPos(0, -1), true);
+
+                    blockStates.forEach((pos, bs) -> {
+                        if (bs.getLuminance() > 0) p.addLightSource(pos, bs.getLuminance());
+                    });
+
+                    p.doLightUpdates(Integer.MAX_VALUE, true, true);
+
+                    return p;
+                }
+
                 @Override
                 public float getBrightness(Direction direction, boolean shaded) {
                     // This function is probably not called, but the return value makes sense at least.
@@ -292,7 +402,7 @@ public class PieceModel implements UnbakedModel {
 
                 @Override
                 public LightingProvider getLightingProvider() {
-                    return null;
+                    return lightingProvider;
                 }
 
                 @Override
