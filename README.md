@@ -54,7 +54,7 @@ Now it's time for building. Simply place the structure block down and build your
 ![Animation of how to build a piece](https://raw.githubusercontent.com/JoeyDP/Immersive-Chess/main/docs/build_piece.gif?raw=true)
 
 
-### (optional) Dye Stands 
+### (Optional) Dye Stands 
 
 All `piece stands` can be dyed in the 16 Minecraft colors
 
