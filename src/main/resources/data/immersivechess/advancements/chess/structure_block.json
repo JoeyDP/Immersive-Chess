@@ -1,0 +1,30 @@
+{
+  "parent": "immersivechess:chess/chess_case",
+  "display": {
+    "icon": {
+      "item": "immersivechess:structure/white_knight"
+    },
+    "title": {
+      "translate": "immersivechess.advancements.chess.structure_block.title"
+    },
+    "description": {
+      "translate": "immersivechess.advancements.chess.structure_block.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "has_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:piece_structure"
+          }
+        ]
+      }
+    }
+  }
+}

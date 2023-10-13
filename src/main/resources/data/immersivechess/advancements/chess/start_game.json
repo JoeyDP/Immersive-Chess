@@ -1,0 +1,26 @@
+{
+  "parent": "immersivechess:chess/chess_case",
+  "display": {
+    "icon": {
+      "item": "minecraft:dark_oak_planks"
+    },
+    "title": {
+      "translate": "immersivechess.advancements.chess.start_game.title"
+    },
+    "description": {
+      "translate": "immersivechess.advancements.chess.start_game.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "game_condition": {
+      "trigger": "immersivechess:game_trigger",
+      "conditions": {
+        "type": "START"
+      }
+    }
+  }
+}

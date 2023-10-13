@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "immersivechess:structure/white",
+  "ingredients": [
+    {
+      "item": "immersivechess:structure/black_rook"
+    },
+    {
+      "item": "minecraft:white_dye"
+    }
+  ],
+  "result": {
+    "item": "immersivechess:structure/white_rook"
+  },
+  "show_notification": false
+}

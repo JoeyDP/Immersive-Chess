@@ -1,0 +1,15 @@
+{
+	"parent": "immersivechess:item/chess_case_closed",
+	"texture_size": [64, 64],
+	"textures": {
+		"0": "immersivechess:item/chess_case"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"open": 1
+			},
+			"model": "immersivechess:item/chess_case_open"
+		}
+	]
+}

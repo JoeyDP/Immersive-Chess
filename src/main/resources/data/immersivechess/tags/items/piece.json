@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "immersivechess:piece/white_pawn",
+    "immersivechess:piece/white_rook",
+    "immersivechess:piece/white_knight",
+    "immersivechess:piece/white_bishop",
+    "immersivechess:piece/white_queen",
+    "immersivechess:piece/white_king",
+    "immersivechess:piece/black_pawn",
+    "immersivechess:piece/black_rook",
+    "immersivechess:piece/black_knight",
+    "immersivechess:piece/black_bishop",
+    "immersivechess:piece/black_queen",
+    "immersivechess:piece/black_king"
+  ]
+}

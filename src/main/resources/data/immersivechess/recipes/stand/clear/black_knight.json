@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "immersivechess:stand/clear",
+  "ingredients": [
+    {
+      "item": "immersivechess:stand/black_knight"
+    }
+  ],
+  "result": {
+    "item": "immersivechess:stand"
+  },
+  "show_notification": false
+}

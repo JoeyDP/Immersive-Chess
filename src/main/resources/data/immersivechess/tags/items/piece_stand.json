@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "immersivechess:stand/white_pawn",
+    "immersivechess:stand/white_rook",
+    "immersivechess:stand/white_knight",
+    "immersivechess:stand/white_bishop",
+    "immersivechess:stand/white_queen",
+    "immersivechess:stand/white_king",
+    "immersivechess:stand/black_pawn",
+    "immersivechess:stand/black_rook",
+    "immersivechess:stand/black_knight",
+    "immersivechess:stand/black_bishop",
+    "immersivechess:stand/black_queen",
+    "immersivechess:stand/black_king"
+  ]
+}

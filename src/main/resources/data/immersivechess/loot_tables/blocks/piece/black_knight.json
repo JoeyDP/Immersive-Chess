@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "immersivechess:piece/black_knight",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "source": "block_entity",
+              "ops": [
+                {
+                  "source": "Structure",
+                  "target": "BlockEntityTag.Structure",
+                  "op": "merge"
+                },
+                {
+                  "source": "GameInfo",
+                  "target": "GameInfo",
+                  "op": "replace"
+                }
+              ]
+            },
+            {
+              "function": "minecraft:copy_state",
+              "block": "immersivechess:piece/black_knight",
+              "properties": [
+                "facing"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

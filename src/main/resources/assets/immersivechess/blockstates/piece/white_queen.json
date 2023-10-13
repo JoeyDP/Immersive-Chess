@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "immersivechess:block/piece/white_queen"},
+    "facing=east":  { "model": "immersivechess:block/piece/white_queen", "y":  90},
+    "facing=south": { "model": "immersivechess:block/piece/white_queen", "y": 180},
+    "facing=west":  { "model": "immersivechess:block/piece/white_queen", "y": 270}
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "color=black": { "model": "immersivechess:block/board_black"},
+    "color=white": { "model": "immersivechess:block/board_white"}
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "immersivechess:structure/black",
+  "ingredients": [
+    {
+      "item": "immersivechess:structure/white_bishop"
+    },
+    {
+      "item": "minecraft:black_dye"
+    }
+  ],
+  "result": {
+    "item": "immersivechess:structure/black_bishop"
+  },
+  "show_notification": false
+}

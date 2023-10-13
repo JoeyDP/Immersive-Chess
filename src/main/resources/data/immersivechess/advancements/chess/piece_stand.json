@@ -1,0 +1,46 @@
+{
+  "parent": "immersivechess:chess/structure_block",
+  "display": {
+    "icon": {
+      "item": "immersivechess:stand/white_knight"
+    },
+    "title": {
+      "translate": "immersivechess.advancements.chess.piece_stand.title"
+    },
+    "description": {
+      "translate": "immersivechess.advancements.chess.piece_stand.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:piece_stand"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "immersivechess:stand/clear/white_pawn",
+      "immersivechess:stand/clear/white_rook",
+      "immersivechess:stand/clear/white_knight",
+      "immersivechess:stand/clear/white_bishop",
+      "immersivechess:stand/clear/white_queen",
+      "immersivechess:stand/clear/white_king",
+      "immersivechess:stand/clear/black_pawn",
+      "immersivechess:stand/clear/black_rook",
+      "immersivechess:stand/clear/black_knight",
+      "immersivechess:stand/clear/black_bishop",
+      "immersivechess:stand/clear/black_queen",
+      "immersivechess:stand/clear/black_king"
+    ]
+  }
+}

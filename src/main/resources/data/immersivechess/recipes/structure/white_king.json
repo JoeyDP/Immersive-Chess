@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "immersivechess:structure/white",
+  "pattern": [
+    "S S",
+    "SPS",
+    "SCS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:stone"
+    },
+    "P": {
+      "item": "minecraft:golden_helmet"
+    },
+    "C": {
+      "item": "minecraft:white_dye"
+    }
+  },
+  "result": {
+    "item": "immersivechess:structure/white_king"
+  },
+  "show_notification": true
+}

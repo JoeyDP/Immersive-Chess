@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "empty=true,facing=north": { "model": "immersivechess:block/structure_base/white_pawn"},
+    "empty=true,facing=east":  { "model": "immersivechess:block/structure_base/white_pawn", "y":  90},
+    "empty=true,facing=south": { "model": "immersivechess:block/structure_base/white_pawn", "y": 180},
+    "empty=true,facing=west":  { "model": "immersivechess:block/structure_base/white_pawn", "y": 270},
+    "empty=false,facing=north": { "model": "immersivechess:block/structure/white_pawn"},
+    "empty=false,facing=east":  { "model": "immersivechess:block/structure/white_pawn", "y":  90},
+    "empty=false,facing=south": { "model": "immersivechess:block/structure/white_pawn", "y": 180},
+    "empty=false,facing=west":  { "model": "immersivechess:block/structure/white_pawn", "y": 270}
+  }
+}

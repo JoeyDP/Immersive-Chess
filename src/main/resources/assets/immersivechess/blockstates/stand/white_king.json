@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": {"model": "immersivechess:block/stand/white_king"},
+    "facing=east":  {"model": "immersivechess:block/stand/white_king", "y": 90},
+    "facing=south": {"model": "immersivechess:block/stand/white_king", "y": 180},
+    "facing=west":  {"model": "immersivechess:block/stand/white_king", "y": 270}
+  }
+}

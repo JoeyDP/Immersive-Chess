@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "immersivechess:structure/black",
+  "pattern": [
+    "S S",
+    "SPS",
+    "SCS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:stone"
+    },
+    "P": {
+      "item": "minecraft:leather_horse_armor"
+    },
+    "C": {
+      "item": "minecraft:black_dye"
+    }
+  },
+  "result": {
+    "item": "immersivechess:structure/black_knight"
+  },
+  "show_notification": true
+}

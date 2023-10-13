@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "immersivechess:block/piece/white_rook"},
+    "facing=east":  { "model": "immersivechess:block/piece/white_rook", "y":  90},
+    "facing=south": { "model": "immersivechess:block/piece/white_rook", "y": 180},
+    "facing=west":  { "model": "immersivechess:block/piece/white_rook", "y": 270}
+  }
+}

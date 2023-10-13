@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "empty=true,facing=north": { "model": "immersivechess:block/structure_base/white_king"},
+    "empty=true,facing=east":  { "model": "immersivechess:block/structure_base/white_king", "y":  90},
+    "empty=true,facing=south": { "model": "immersivechess:block/structure_base/white_king", "y": 180},
+    "empty=true,facing=west":  { "model": "immersivechess:block/structure_base/white_king", "y": 270},
+    "empty=false,facing=north": { "model": "immersivechess:block/structure/white_king"},
+    "empty=false,facing=east":  { "model": "immersivechess:block/structure/white_king", "y":  90},
+    "empty=false,facing=south": { "model": "immersivechess:block/structure/white_king", "y": 180},
+    "empty=false,facing=west":  { "model": "immersivechess:block/structure/white_king", "y": 270}
+  }
+}

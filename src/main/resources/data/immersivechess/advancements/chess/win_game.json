@@ -1,0 +1,31 @@
+{
+  "parent": "immersivechess:chess/start_game",
+  "display": {
+    "icon": {
+      "item": "minecraft:golden_helmet"
+    },
+    "title": {
+      "translate": "immersivechess.advancements.chess.win_game.title"
+    },
+    "description": {
+      "translate": "immersivechess.advancements.chess.win_game.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "game_condition": {
+      "trigger": "immersivechess:game_trigger",
+      "conditions": {
+        "type": "WIN"
+      }
+    }
+  },
+  "rewards": {
+    "loot": [
+      "immersivechess:advancements/golden_helmet"
+    ]
+  }
+}

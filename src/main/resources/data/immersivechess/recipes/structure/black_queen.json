@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "immersivechess:structure/black",
+  "pattern": [
+    "S S",
+    "SPS",
+    "SCS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:stone"
+    },
+    "P": {
+      "item": "minecraft:diamond_helmet"
+    },
+    "C": {
+      "item": "minecraft:black_dye"
+    }
+  },
+  "result": {
+    "item": "immersivechess:structure/black_queen"
+  },
+  "show_notification": true
+}

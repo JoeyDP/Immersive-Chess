@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "immersivechess",
+  "version": "${version}",
+
+  "name": "Immersive Chess",
+  "description": "Play chess with your own pieces on a board you can build yourself",
+  "authors": [
+    "Joey De Pauw",
+    "IneMEGAmaxi",
+    "s_m_t_d_m_"
+  ],
+  "contact": {
+    "homepage": "https://github.com/JoeyDP/Immersive-Chess",
+    "sources": "https://github.com/JoeyDP/Immersive-Chess"
+  },
+
+  "license": "MIT",
+  "icon": "assets/immersivechess/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "be.immersivechess.client.data.DataGenerator"
+    ],
+    "main": [
+      "be.immersivechess.ImmersiveChess"
+    ],
+    "client": [
+      "be.immersivechess.client.ImmersiveChessClient"
+    ]
+  },
+  "mixins": [
+    "immersivechess.mixins.json",
+    {
+      "config": "immersivechess.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "accessWidener" : "immersivechess.accesswidener",
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "fabric": "*",
+    "minecraft": "~1.19.4",
+    "java": ">=17"
+  },
+  "suggests": {
+  }
+}

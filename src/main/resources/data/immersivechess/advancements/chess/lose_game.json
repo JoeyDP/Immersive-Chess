@@ -1,0 +1,31 @@
+{
+  "parent": "immersivechess:chess/start_game",
+  "display": {
+    "icon": {
+      "item": "minecraft:coal"
+    },
+    "title": {
+      "translate": "immersivechess.advancements.chess.lose_game.title"
+    },
+    "description": {
+      "translate": "immersivechess.advancements.chess.lose_game.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "game_condition": {
+      "trigger": "immersivechess:game_trigger",
+      "conditions": {
+        "type": "LOSE"
+      }
+    }
+  },
+  "rewards": {
+    "loot": [
+      "minecraft:blocks/coal_ore"
+    ]
+  }
+}

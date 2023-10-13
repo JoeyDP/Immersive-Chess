@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "immersivechess:structure/white",
+  "pattern": [
+    "S S",
+    "SPS",
+    "SCS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:stone"
+    },
+    "P": {
+      "item": "minecraft:writable_book"
+    },
+    "C": {
+      "item": "minecraft:white_dye"
+    }
+  },
+  "result": {
+    "item": "immersivechess:structure/white_bishop"
+  },
+  "show_notification": true
+}

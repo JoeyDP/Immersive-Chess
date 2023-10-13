@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "immersivechess:chess_case",
+  "pattern": [
+    "WLB",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "L": {
+      "item": "minecraft:iron_nugget"
+    },
+    "B": {
+      "item": "minecraft:black_dye"
+    },
+    "W": {
+      "item": "minecraft:white_dye"
+    }
+  },
+  "result": {
+    "item": "immersivechess:chess_case"
+  },
+  "show_notification": true
+}

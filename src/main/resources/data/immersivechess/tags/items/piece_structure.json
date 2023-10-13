@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "immersivechess:structure/white_pawn",
+    "immersivechess:structure/white_rook",
+    "immersivechess:structure/white_knight",
+    "immersivechess:structure/white_bishop",
+    "immersivechess:structure/white_queen",
+    "immersivechess:structure/white_king",
+    "immersivechess:structure/black_pawn",
+    "immersivechess:structure/black_rook",
+    "immersivechess:structure/black_knight",
+    "immersivechess:structure/black_bishop",
+    "immersivechess:structure/black_queen",
+    "immersivechess:structure/black_king"
+  ]
+}

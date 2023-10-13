@@ -1,0 +1,207 @@
+{
+  "parent": "immersivechess:chess/piece_stand",
+  "display": {
+    "icon": {
+      "item": "immersivechess:stand/white_knight",
+      "nbt": "{BlockEntityTag: {Color: -3715395}}"
+    },
+    "title": {
+      "translate": "immersivechess.advancements.chess.stand_dye.title"
+    },
+    "description": {
+      "translate": "immersivechess.advancements.chess.stand_dye.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "has_white": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -393218}}"
+          }
+        ]
+      }
+    },
+    "has_orange": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -425955}}"
+          }
+        ]
+      }
+    },
+    "has_magenta": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -3715395}}"
+          }
+        ]
+      }
+    },
+    "has_light_blue": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color:-12930086 }}"
+          }
+        ]
+      }
+    },
+    "has_lime": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -8337633}}"
+          }
+        ]
+      }
+    },
+    "has_pink": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -816214}}"
+          }
+        ]
+      }
+    },
+    "has_gray": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -12103854}}"
+          }
+        ]
+      }
+    },
+    "has_light_gray": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -6447721}}"
+          }
+        ]
+      }
+    },
+    "has_cyan": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -15295332}}"
+          }
+        ]
+      }
+    },
+    "has_purple": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -7785800}}"
+          }
+        ]
+      }
+    },
+    "has_blue": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -12827478}}"
+          }
+        ]
+      }
+    },
+    "has_brown": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -8170446}}"
+          }
+        ]
+      }
+    },
+    "has_green": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -10585066}}"
+          }
+        ]
+      }
+    },
+    "has_red": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -5231066}}"
+          }
+        ]
+      }
+    },
+    "has_black": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "immersivechess:all_stand",
+            "nbt": "{BlockEntityTag: {Color: -14869215}}"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_white",
+      "has_orange",
+      "has_magenta",
+      "has_light_blue",
+      "has_lime",
+      "has_pink",
+      "has_gray",
+      "has_light_gray",
+      "has_cyan",
+      "has_purple",
+      "has_blue",
+      "has_brown",
+      "has_green",
+      "has_red",
+      "has_black"
+    ]
+  ],
+  "rewards": {
+  }
+}

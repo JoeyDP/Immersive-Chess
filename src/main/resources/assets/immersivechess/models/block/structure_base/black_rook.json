@@ -1,0 +1,6 @@
+{
+	"parent": "immersivechess:block/structure_base/piece_structure_block",
+	"textures": {
+        "icon": "immersivechess:item/icon/black_rook"
+	}
+}

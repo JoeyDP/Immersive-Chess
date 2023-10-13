@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "immersivechess:structure/white",
+  "ingredients": [
+    {
+      "item": "immersivechess:structure/black_pawn"
+    },
+    {
+      "item": "minecraft:white_dye"
+    }
+  ],
+  "result": {
+    "item": "immersivechess:structure/white_pawn"
+  },
+  "show_notification": false
+}

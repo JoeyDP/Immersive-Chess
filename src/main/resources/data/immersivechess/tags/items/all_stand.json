@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "immersivechess:stand",
+    "#immersivechess:piece_stand"
+  ]
+}
