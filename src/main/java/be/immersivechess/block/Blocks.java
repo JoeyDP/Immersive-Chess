@@ -5,8 +5,10 @@ import be.immersivechess.logic.Piece;
 import ch.astorm.jchess.core.Color;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
@@ -26,7 +28,9 @@ public class Blocks {
     public static final StandBlock BLANK_STAND = register(
             new Identifier(ImmersiveChess.MOD_ID, "stand"),
             new StandBlock(FabricBlockSettings
-                    .of(new Material.Builder(MapColor.GOLD).destroyedByPiston().build())
+                    .create()
+                    .mapColor(MapColor.GOLD)
+                    .pistonBehavior(PistonBehavior.DESTROY)
                     .strength(0.3f)
                     .nonOpaque()));
 
@@ -35,7 +39,7 @@ public class Blocks {
     public static final List<PieceStructureBlock> PIECE_STRUCTURE_BLOCKS = Arrays.stream(Piece.values()).map(Blocks::createPieceStructureBlock).toList();
 
     public static BoardBlock BOARD_BLOCK = register("board", new BoardBlock(FabricBlockSettings
-            .of(Material.STONE)
+            .create()
             .strength(-1.0f, 3600000.0f)
             .nonOpaque()
             .dynamicBounds()        // to disable shape cache -> for overriding opacity
@@ -47,7 +51,9 @@ public class Blocks {
     private static PieceBlock createPieceBlock(Piece piece) {
         return register(piece.getIdentifier().withPrefixedPath("piece/"), new PieceBlock(
                 FabricBlockSettings
-                        .of(new Material.Builder(MapColor.CLEAR).blocksPistons().build())
+                        .create()
+                        .mapColor(MapColor.CLEAR)
+                        .pistonBehavior(PistonBehavior.BLOCK)
                         .hardness(0f)
                         .resistance(3600000.0f)
                         .nonOpaque()
@@ -59,8 +65,9 @@ public class Blocks {
     private static PieceStandBlock createPieceStandBlock(Piece piece) {
         return register(piece.getIdentifier().withPrefixedPath("stand/"), new PieceStandBlock(
                 FabricBlockSettings
-                        .of(new Material.Builder(piece.getColor() == Color.WHITE ? MapColor.WHITE : MapColor.BLACK)
-                                .destroyedByPiston().build())
+                        .create()
+                        .mapColor(piece.getColor() == Color.WHITE ? MapColor.WHITE : MapColor.BLACK)
+                        .pistonBehavior(PistonBehavior.DESTROY)
                         .strength(0.3f)
                         .nonOpaque(),
                 piece)
@@ -69,7 +76,10 @@ public class Blocks {
 
     private static PieceStructureBlock createPieceStructureBlock(Piece piece) {
         return register(piece.getIdentifier().withPrefixedPath("structure/"), new PieceStructureBlock(
-                FabricBlockSettings.of(Material.STONE).strength(3f).dynamicBounds(),
+                FabricBlockSettings
+                        .create()
+                        .strength(3f)
+                        .dynamicBounds(),
                 piece));
     }
 

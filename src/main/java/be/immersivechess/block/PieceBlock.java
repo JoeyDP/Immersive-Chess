@@ -20,6 +20,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
@@ -228,7 +229,7 @@ public class PieceBlock extends BlockWithEntity implements PieceContainer {
     }
 
     @Override
-    public List<ItemStack> getDroppedStacks(BlockState state, LootContext.Builder builder) {
+    public List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
         // if not on an ongoing game, don't drop anything
         BlockPos pos = BlockPos.ofFloored(builder.get(LootContextParameters.ORIGIN));
         ChessGameState gameState = getGameState(builder.getWorld(), pos);

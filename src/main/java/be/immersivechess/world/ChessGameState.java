@@ -96,7 +96,8 @@ public class ChessGameState extends PersistentState {
 
     @Nullable
     public static ChessGameState get(ServerWorld world, String gameId) {
-        return world.getPersistentStateManager().get(nbt -> fromNbt(world, nbt), LOCATION + gameId);
+        Type<ChessGameState> type = new Type<>(null, nbt -> fromNbt(world, nbt), null);
+        return world.getPersistentStateManager().get(type, LOCATION + gameId);
     }
 
     public String getGameId() {

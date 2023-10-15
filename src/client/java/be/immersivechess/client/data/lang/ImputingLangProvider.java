@@ -12,6 +12,7 @@ import net.minecraft.util.Identifier;
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class ImputingLangProvider extends BaseLangProvider {
     protected ImputingLangProvider(FabricDataOutput dataOutput, String languageCode) {
@@ -41,10 +42,10 @@ public class ImputingLangProvider extends BaseLangProvider {
         addIfMissing(Registries.STAT_TYPE, translationBuilder::add);
         addIfMissing(Registries.STATUS_EFFECT, translationBuilder::add);
 
-        // For ItemGroups there is no registry
-        for (ItemGroup itemGroup : ItemGroups.getGroups().stream().filter(g -> withinNamespace(g.getId())).toList()){
-            translationBuilder.add(itemGroup, itemGroup.getId().toString());
-        }
+        // a lot of work because out of all registries, itemgroups are the only one that use keys iso the actual value
+        // because it needs to be final apparently
+        TranslationBuilder tb = translationBuilder;
+        addIfMissing(Registries.ITEM_GROUP, (ig, val) -> tb.add(Registries.ITEM_GROUP.getKey(ig).get(), val));
     }
 
     private <T> void addIfMissing(Registry<T> registry, BiConsumer<T, String> consumer) {
