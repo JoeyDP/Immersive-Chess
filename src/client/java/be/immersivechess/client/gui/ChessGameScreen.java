@@ -8,12 +8,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.DataFixUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
@@ -113,62 +113,62 @@ public class ChessGameScreen extends HandledScreen<ChessGameScreenHandler> {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         // grays out world
-        this.renderBackground(matrices);
-        super.render(matrices, mouseX, mouseY, delta);
-        super.drawMouseoverTooltip(matrices, mouseX, mouseY);
+        this.renderBackground(context, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
+        super.drawMouseoverTooltip(context, mouseX, mouseY);
     }
 
     @Override
-    protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
+    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
         // player names
-        float nameY = titleY + 16;
-        float whiteX = backgroundWidth / 4f - textRenderer.getWidth(handler.getWhite()) / 2f;
-        float blackX = 3 * backgroundWidth / 4f - textRenderer.getWidth(handler.getBlack()) / 2f;
-        this.textRenderer.draw(matrices, handler.getWhite(), whiteX, nameY, 0xFFFFFF);
-        this.textRenderer.draw(matrices, handler.getBlack(), blackX, nameY, 0x000000);
+        int nameY = titleY + 16;
+        int whiteX = (int)(backgroundWidth / 4f - textRenderer.getWidth(handler.getWhite()) / 2f);
+        int blackX = (int)(3 * backgroundWidth / 4f - textRenderer.getWidth(handler.getBlack()) / 2f);
+        context.drawText(textRenderer, handler.getWhite(), whiteX, nameY, 0xFFFFFF, false);
+        context.drawText(textRenderer, handler.getBlack(), blackX, nameY, 0x000000, false);
 
         // move counter
-        float moveY = nameY + 16;
+        int moveY = nameY + 16;
         String moveCountText = Integer.toString((int) Math.ceil(handler.getMoveCount() / 2d));
         int moveCountWidth = textRenderer.getWidth(moveCountText);
-        float moveX = backgroundWidth / 2f - moveCountWidth / 2f;
-        this.textRenderer.draw(matrices, moveCountText, moveX, moveY, 0x404040);
+        int moveX = (int)(backgroundWidth / 2f - moveCountWidth / 2f);
+        context.drawText(textRenderer, moveCountText, moveX, moveY, 0x404040, false);
 
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.setShaderTexture(0, TEXTURE);
+//        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+//        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+//        RenderSystem.setShaderTexture(0, TEXTURE);
 
         // turn and game outcome
         switch (handler.getStatus()) {
             case NOT_FINISHED -> {
                 // turn
                 switch (handler.getTurn()) {
-                    case WHITE -> drawTexture(matrices, (int) moveX - 7, (int) moveY + 1, 0, backgroundHeight, 4, 6);
+                    case WHITE -> context.drawTexture(TEXTURE, moveX - 7, moveY + 1, 0, backgroundHeight, 4, 6);
                     case BLACK ->
-                            drawTexture(matrices, (int) moveX + 3 + moveCountWidth, (int) moveY + 1, 4, backgroundHeight, 4, 6);
+                            context.drawTexture(TEXTURE, moveX + 3 + moveCountWidth, moveY + 1, 4, backgroundHeight, 4, 6);
                 }
             }
             // winner
             case WIN_WHITE ->
-                    drawTexture(matrices, backgroundWidth / 4 - 5, (int) nameY - 9, 8, backgroundHeight, 11, 5);
+                    context.drawTexture(TEXTURE, backgroundWidth / 4 - 5, nameY - 9, 8, backgroundHeight, 11, 5);
             case WIN_BLACK ->
-                    drawTexture(matrices, 3 * backgroundWidth / 4 - 5, (int) nameY - 9, 8, backgroundHeight, 11, 5);
+                    context.drawTexture(TEXTURE, 3 * backgroundWidth / 4 - 5, nameY - 9, 8, backgroundHeight, 11, 5);
             // draw
             case DRAW, DRAW_STALEMATE, DRAW_REPETITION, DRAW_NOCAPTURE -> {
-                drawTexture(matrices, backgroundWidth / 4 - 5, (int) nameY - 9, 19, backgroundHeight, 11, 5);
-                drawTexture(matrices, 3 * backgroundWidth / 4 - 5, (int) nameY - 9, 19, backgroundHeight, 11, 5);
+                context.drawTexture(TEXTURE, backgroundWidth / 4 - 5, nameY - 9, 19, backgroundHeight, 11, 5);
+                context.drawTexture(TEXTURE, 3 * backgroundWidth / 4 - 5, nameY - 9, 19, backgroundHeight, 11, 5);
             }
         }
     }
 
     @Override
-    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+//        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+//        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+//        RenderSystem.setShaderTexture(0, TEXTURE);
+        context.drawTexture(TEXTURE, x, y, 0, 0, backgroundWidth, backgroundHeight);
     }
 
     private ButtonWidget.PressAction createButtonAction(ChessGameScreenHandler.Button buttonType) {

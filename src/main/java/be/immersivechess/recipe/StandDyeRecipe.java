@@ -2,38 +2,34 @@ package be.immersivechess.recipe;
 
 import be.immersivechess.item.PieceContainer;
 import be.immersivechess.item.StandItem;
-import com.google.common.collect.Lists;
-import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.DyeItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 public class StandDyeRecipe extends SpecialCraftingRecipe {
-    public StandDyeRecipe(Identifier id, CraftingRecipeCategory category) {
-        super(id, category);
+    public StandDyeRecipe(CraftingRecipeCategory category) {
+        super(category);
     }
 
     @Override
-    public boolean matches(CraftingInventory inventory, World world) {
+    public boolean matches(RecipeInputInventory inventory, World world) {
         return parseIngredients(inventory).isPresent();
     }
 
     /**
      * Return ItemStack of StandItem to be dyed and single dyeitem if recipe is valid.
      */
-    private Optional<Pair<ItemStack, DyeItem>> parseIngredients(CraftingInventory inventory) {
+    private Optional<Pair<ItemStack, DyeItem>> parseIngredients(RecipeInputInventory inventory) {
         // check whether grid contains exactly one stand and one dye
         ItemStack standItemStack = ItemStack.EMPTY;
         DyeItem dyeItem = null;
@@ -65,7 +61,7 @@ public class StandDyeRecipe extends SpecialCraftingRecipe {
     }
 
     @Override
-    public ItemStack craft(CraftingInventory inventory, DynamicRegistryManager registryManager) {
+    public ItemStack craft(RecipeInputInventory inventory, DynamicRegistryManager registryManager) {
         Optional<Pair<ItemStack, DyeItem>> parsedIngredients = parseIngredients(inventory);
         if (parsedIngredients.isEmpty())
             return ItemStack.EMPTY;

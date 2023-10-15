@@ -2,6 +2,11 @@
 A Minecraft mod to play chess with your own pieces.
 
 ![ImmersiveChess](https://raw.githubusercontent.com/JoeyDP/Immersive-Chess/main/docs/board_overview_banner.png)
+<div style="text-align:center;">
+<a href="https://www.curseforge.com/minecraft/mc-mods/immersive-chess/files"><img src="https://cf.way2muchnoise.eu/versions/immersive-chess.svg" alt="Supported Versions"></a>&nbsp;&nbsp;
+<a href="https://www.curseforge.com/minecraft/mc-mods/immersive-chess"><img src="http://cf.way2muchnoise.eu/immersive-chess.svg" alt="CF"></a>&nbsp;&nbsp;
+<a href="https://modrinth.com/mod/immersive-chess"><img src="https://img.shields.io/modrinth/dt/immersive-chess?logo=modrinth&label=&suffix=%20&style=flat&color=242629&labelColor=5ca424&logoColor=1c1c1c" alt="Modrinth"></a>
+</div>
 
 ## Features
 - Play chess with your friends
