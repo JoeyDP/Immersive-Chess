@@ -122,12 +122,13 @@ public class Items {
             new Identifier(ImmersiveChess.MOD_ID, "immersivechess"),
             FabricItemGroup.builder()
                     .icon(() -> new ItemStack(CHESS_CASE))
-                    .displayName(Text.translatable(new Identifier(ImmersiveChess.MOD_ID, "immersivechess").toTranslationKey()))
-                    .build()
     );
 
-    private static ItemGroup register(Identifier id, ItemGroup itemGroup) {
-        return Registry.register(Registries.ITEM_GROUP, id, itemGroup);
+    private static ItemGroup register(Identifier id, ItemGroup.Builder builder) {
+        ItemGroup group = builder
+                .displayName(Text.translatable(id.toTranslationKey("itemGroup")))
+                .build();
+        return Registry.register(Registries.ITEM_GROUP, id, group);
     }
 
     public static void onInitialize() {
