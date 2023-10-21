@@ -1,13 +1,11 @@
 package be.immersivechess.client.render.model;
 
-import be.immersivechess.ImmersiveChess;
 import be.immersivechess.client.structure.StructureResolver;
 import be.immersivechess.logic.Piece;
 import be.immersivechess.structure.StructureHelper;
 import com.google.common.collect.MapMaker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
@@ -17,52 +15,42 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
-import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.fabricmc.fabric.api.util.TriState;
-import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.EncodingFormat;
-import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.ItemRenderContext;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.color.world.GrassColors;
-import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.BlockModels;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.AffineTransformation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ColorHelper;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.*;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
+import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.biome.ColorResolver;
-import net.minecraft.world.chunk.ChunkProvider;
-import net.minecraft.world.chunk.light.ChunkLightingView;
-import net.minecraft.world.chunk.light.LightSourceView;
 import net.minecraft.world.chunk.light.LightingProvider;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -99,7 +87,6 @@ public class PieceModel implements UnbakedModel {
         private final Piece piece;
         private final Sprite particles;
         private final ModelBakeSettings rotationContainer;
-        private static final boolean CULL = true;
         private static final float SCALE = 1f / 8f;
 
         private final ModelTransformation modelTransformation;
@@ -282,18 +269,11 @@ public class PieceModel implements UnbakedModel {
                 QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
                 QuadTransform tintTransform = new QuadTransform.TintRemap(bs);
 
-//                for (int i = 0; i <= ModelHelper.NULL_FACE_ID; i++) {
-//                    Direction direction = ModelHelper.faceFromIndex(i);
+                // TODO: Could add support for blockState appearances, which may differ from actual block states (facades etc.)
+                //  However, they depend on direction
+//                bs = bs.getAppearance(world, pos, direction, bs, null);
 
-                // update to blockState appearances, which may differ from actual block states (facades etc.)
-//                    bs = bs.getAppearance(world, pos, direction, bs, null);
                 BakedModel model = blockModels.getModel(bs);
-//
-//                    if (direction != null) {
-//                        // culling is possible
-//                        BlockPos neighbourPos = pos.offset(direction);
-//                        if (CULL && !Block.shouldDrawSide(bs, world, pos, direction, neighbourPos)) continue;
-//                    }
 
                 myEmitter.pushTransform(translateTransform);
                 myEmitter.pushTransform(materialTransform);
@@ -309,19 +289,7 @@ public class PieceModel implements UnbakedModel {
                 myEmitter.popTransform();
                 myEmitter.popTransform();
                 myEmitter.popTransform();
-
-//                    for (BakedQuad quad : model.getQuads(bs, direction, random)) {
-//                        emitter.fromVanilla(quad, material, null);       //  set cullFace to null because quads are not guaranteed to be on a face (not full block)
-//
-//                        translateTransform.transform(emitter);
-//                        scaleTransform.transform(emitter);
-//                        rotationTransform.transform(emitter);
-//                        tintTransform.transform(emitter);
-//
-//                        emitter.emit();
-//                    }
             }
-//            }
 
             myEmitter.popTransform();
             myEmitter.popTransform();
@@ -338,7 +306,6 @@ public class PieceModel implements UnbakedModel {
                 public float getBrightness(Direction direction, boolean shaded) {
                     // Brightness gets applied again when rendering to world, and we don't want it twice
                     return 1;
-//                    return worldBlockView.getBrightness(direction, shaded);
                 }
 
                 @Override
@@ -369,10 +336,8 @@ public class PieceModel implements UnbakedModel {
 
                 @Override
                 public int getColor(BlockPos pos, ColorResolver colorResolver) {
-//                    ImmersiveChess.LOGGER.warn("got unexpected call to getColor. Likely wrong value was returned");
+                    // Ideally, we don't want to color the cached model yet, but have it get its color when placed.
                     return ColorHelper.Argb.getArgb(255, 255, 255, 255);
-//                    return GrassColors.getDefaultColor();
-//                    return worldBlockView.getColor(pos, colorResolver);
                 }
 
                 @Override
