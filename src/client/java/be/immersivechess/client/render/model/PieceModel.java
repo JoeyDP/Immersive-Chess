@@ -4,70 +4,67 @@ import be.immersivechess.ImmersiveChess;
 import be.immersivechess.client.structure.StructureResolver;
 import be.immersivechess.logic.Piece;
 import be.immersivechess.structure.StructureHelper;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
+import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
-import net.fabricmc.fabric.impl.client.indigo.renderer.aocalc.VanillaAoHelper;
+import net.fabricmc.fabric.api.util.TriState;
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.EncodingFormat;
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
+import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
+import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
+import net.fabricmc.fabric.impl.client.indigo.renderer.render.ItemRenderContext;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.render.block.BlockModelRenderer;
+import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.color.world.GrassColors;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.BlockModels;
-import net.minecraft.client.render.block.entity.LightmapCoordinatesRetriever;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.server.world.ChunkTaskPrioritySystem;
-import net.minecraft.server.world.ServerLightingProvider;
-import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.util.thread.TaskExecutor;
 import net.minecraft.world.*;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.biome.ColorResolver;
-import net.minecraft.world.chunk.ChunkNibbleArray;
 import net.minecraft.world.chunk.ChunkProvider;
-import net.minecraft.world.chunk.EmptyChunk;
-import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.world.chunk.light.ChunkBlockLightProvider;
-import net.minecraft.world.chunk.light.ChunkSkyLightProvider;
+import net.minecraft.world.chunk.light.ChunkLightingView;
+import net.minecraft.world.chunk.light.LightSourceView;
 import net.minecraft.world.chunk.light.LightingProvider;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public class PieceModel implements UnbakedModel {
@@ -146,7 +143,7 @@ public class PieceModel implements UnbakedModel {
 
         @Override
         public boolean useAmbientOcclusion() {
-            return true;
+            return false;
         }
 
         @Override
@@ -192,7 +189,7 @@ public class PieceModel implements UnbakedModel {
                 return;
 
             Mesh mesh = getOrCreateMesh(structure, blockView, randomSupplier);
-            renderContext.meshConsumer().accept(mesh);
+            mesh.outputTo(renderContext.getEmitter());
         }
 
         @Override
@@ -203,7 +200,7 @@ public class PieceModel implements UnbakedModel {
                 return;
 
             Mesh mesh = getOrCreateMesh(structure, MinecraftClient.getInstance().world, randomSupplier);
-            renderContext.meshConsumer().accept(mesh);
+            mesh.outputTo(renderContext.getEmitter());
         }
 
         @Nullable
@@ -235,18 +232,48 @@ public class PieceModel implements UnbakedModel {
 //            ImmersiveChess.LOGGER.info("cache size " + meshCache.size());
 
             net.minecraft.util.math.random.Random random = randomSupplier.get();
-            RenderMaterial material = RendererAccess.INSTANCE.getRenderer().materialFinder().blendMode(BlendMode.TRANSLUCENT).find();
+            RenderMaterial material = RendererAccess.INSTANCE.getRenderer().materialFinder().blendMode(BlendMode.TRANSLUCENT).ambientOcclusion(TriState.FALSE).find();
             BlockModels blockModels = MinecraftClient.getInstance().getBakedModelManager().getBlockModels();
 
             AffineTransformation affineTransformation = rotationContainer.getRotation();
             QuadTransform rotationTransform = new QuadTransform.Rotate(affineTransformation.getLeftRotation());
             QuadTransform scaleTransform = new QuadTransform.Scale(SCALE);
+            QuadTransform materialTransform = new QuadTransform() {
+                @Override
+                public boolean transform(MutableQuadView quad) {
+                    quad.material(material);
+                    return true;
+                }
+            };
 
+            // TODO: provide block entities from structure
             Map<BlockPos, BlockState> blockStates = StructureHelper.buildBlockStateMap(structure);
             BlockRenderView world = createBlockRenderView(worldBlockView, blockStates);
             Renderer renderer = RendererAccess.INSTANCE.getRenderer();
             MeshBuilder builder = renderer.meshBuilder();
             QuadEmitter emitter = builder.getEmitter();
+
+//            VertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
+
+            BlockRenderInfo blockRenderInfo = new BlockRenderInfo();
+            blockRenderInfo.prepareForWorld(world, true);
+
+            ForwardingEmitter myEmitter = new ForwardingEmitter(emitter, blockRenderInfo);
+
+            BlockRenderContext renderContext = new BlockRenderContext() {
+                @Override
+                public QuadEmitter getEmitter() {
+                    return myEmitter;
+                }
+
+                @Override
+                public QuadEmitter getVanillaModelEmitter() {
+                    return myEmitter;
+                }
+            };
+
+            myEmitter.pushTransform(rotationTransform);
+            myEmitter.pushTransform(scaleTransform);
 
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
@@ -255,51 +282,97 @@ public class PieceModel implements UnbakedModel {
                 QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
                 QuadTransform tintTransform = new QuadTransform.TintRemap(bs);
 
-                for (Direction direction : Stream.concat(Arrays.stream(Direction.values()), Stream.of((Direction) null)).toList()) {
-                    // update to blockState appearances, which may differ from actual block states (facades etc.)
-                    bs = bs.getAppearance(world, pos, direction, bs, null);
-                    BakedModel model = blockModels.getModel(bs);
+//                for (int i = 0; i <= ModelHelper.NULL_FACE_ID; i++) {
+//                    Direction direction = ModelHelper.faceFromIndex(i);
 
-                    if (direction != null) {
-                        // culling is possible
-                        BlockPos neighbourPos = pos.offset(direction);
-                        if (CULL && !Block.shouldDrawSide(bs, world, pos, direction, neighbourPos)) continue;
-                    }
+                // update to blockState appearances, which may differ from actual block states (facades etc.)
+//                    bs = bs.getAppearance(world, pos, direction, bs, null);
+                BakedModel model = blockModels.getModel(bs);
+//
+//                    if (direction != null) {
+//                        // culling is possible
+//                        BlockPos neighbourPos = pos.offset(direction);
+//                        if (CULL && !Block.shouldDrawSide(bs, world, pos, direction, neighbourPos)) continue;
+//                    }
 
-                    for (BakedQuad quad : model.getQuads(bs, direction, random)) {
-                        emitter.fromVanilla(quad, material, null);       //  set cullFace to null because quads are not guaranteed to be on a face (not full block)
+                myEmitter.pushTransform(translateTransform);
+                myEmitter.pushTransform(materialTransform);
+                myEmitter.pushTransform(tintTransform);
 
-                        translateTransform.transform(emitter);
-                        scaleTransform.transform(emitter);
-                        rotationTransform.transform(emitter);
-                        tintTransform.transform(emitter);
+                // TODO: issue when rendering to emitter, it applies color and doesn't supply tintIndex anymore
+//              renderContext.render(world, model, bs, pos, new MatrixStack(), vertexConsumer, true, random, 0, OverlayTexture.DEFAULT_UV);
 
-                        emitter.emit();
-                    }
-                }
+                blockRenderInfo.prepareForBlock(bs, pos, model.useAmbientOcclusion());
+
+                model.emitBlockQuads(world, bs, pos, randomSupplier, renderContext);
+
+                myEmitter.popTransform();
+                myEmitter.popTransform();
+                myEmitter.popTransform();
+
+//                    for (BakedQuad quad : model.getQuads(bs, direction, random)) {
+//                        emitter.fromVanilla(quad, material, null);       //  set cullFace to null because quads are not guaranteed to be on a face (not full block)
+//
+//                        translateTransform.transform(emitter);
+//                        scaleTransform.transform(emitter);
+//                        rotationTransform.transform(emitter);
+//                        tintTransform.transform(emitter);
+//
+//                        emitter.emit();
+//                    }
             }
+//            }
+
+            myEmitter.popTransform();
+            myEmitter.popTransform();
+
             return builder.build();
         }
 
         private BlockRenderView createBlockRenderView(BlockRenderView worldBlockView, Map<BlockPos, BlockState> blockStates) {
-            return new BlockRenderView() {
+            // TODO: extract class and turn into RenderBlockView that extends FabricBlockView
+            // TODO: when complete, should no longer need worldBlockView
+            return new RenderAttachedBlockView() {
 
                 @Override
                 public float getBrightness(Direction direction, boolean shaded) {
-                    // This function is probably not called, but the return value makes sense at least.
-                    return worldBlockView.getBrightness(direction, shaded);
+                    // Brightness gets applied again when rendering to world, and we don't want it twice
+                    return 1;
+//                    return worldBlockView.getBrightness(direction, shaded);
                 }
 
                 @Override
                 public LightingProvider getLightingProvider() {
-                    return null;
+                    // TODO: this is not correct
+                    return worldBlockView.getLightingProvider();
+
+//                    RenderAttachedBlockView view = this;
+//
+//                    return new LightingProvider(new ChunkProvider() {
+//                        @Nullable
+//                        @Override
+//                        public LightSourceView getChunk(int chunkX, int chunkZ) {
+//                            return null;
+//                        }
+//
+//                        @Override
+//                        public BlockView getWorld() {
+//                            return view;
+//                        }
+//                    }, true, true){
+//                        @Override
+//                        public int getLight(BlockPos pos, int ambientDarkness) {
+//                            return LightmapTextureManager.MAX_LIGHT_COORDINATE;
+//                        }
+//                    };
                 }
 
                 @Override
                 public int getColor(BlockPos pos, ColorResolver colorResolver) {
-                    // This function is never called, we return something sensible just in case.
-                    ImmersiveChess.LOGGER.debug("got unexpected call to getColor. Likely wrong value was returned");
-                    return worldBlockView.getColor(pos, colorResolver);
+//                    ImmersiveChess.LOGGER.warn("got unexpected call to getColor. Likely wrong value was returned");
+                    return ColorHelper.Argb.getArgb(255, 255, 255, 255);
+//                    return GrassColors.getDefaultColor();
+//                    return worldBlockView.getColor(pos, colorResolver);
                 }
 
                 @Override
@@ -315,6 +388,7 @@ public class PieceModel implements UnbakedModel {
                 @Nullable
                 @Override
                 public BlockEntity getBlockEntity(BlockPos pos) {
+                    // TODO
                     return null;
                 }
 

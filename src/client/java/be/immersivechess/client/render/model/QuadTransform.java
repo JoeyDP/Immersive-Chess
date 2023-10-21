@@ -59,7 +59,7 @@ public abstract class QuadTransform implements RenderContext.QuadTransform {
         }
     }
 
-    private static abstract class RotationTransform extends QuadTransform{
+    private static abstract class RotationTransform extends PositionTransform{
         @Override
         public boolean transform(MutableQuadView quad) {
             Vector3f p = new Vector3f();
@@ -71,17 +71,14 @@ public abstract class QuadTransform implements RenderContext.QuadTransform {
                 // also transform normals
                 if (quad.hasNormal(i)){
                     quad.copyNormal(i, p);
-                    apply(p);
+                    applyNormal(p);
                     quad.normal(i, p);
                 }
             }
             return true;
         }
 
-        /**
-         * Applied for all vertices in the quad
-         */
-        abstract protected void apply(Vector3f pos);
+        abstract protected void applyNormal(Vector3f pos);
     }
 
     public static class Rotate extends RotationTransform{
@@ -111,6 +108,11 @@ public abstract class QuadTransform implements RenderContext.QuadTransform {
             p.sub(center);
             p.mul(rotation);
             p.add(center);
+        }
+
+        @Override
+        protected void applyNormal(Vector3f n) {
+            n.mul(rotation);
         }
     }
 
