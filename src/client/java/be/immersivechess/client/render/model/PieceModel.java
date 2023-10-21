@@ -6,6 +6,7 @@ import be.immersivechess.structure.StructureHelper;
 import com.google.common.collect.MapMaker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
@@ -41,13 +42,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.AffineTransformation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.biome.ColorResolver;
+import net.minecraft.world.chunk.ChunkProvider;
+import net.minecraft.world.chunk.light.LightSourceView;
 import net.minecraft.world.chunk.light.LightingProvider;
 import org.jetbrains.annotations.Nullable;
 
@@ -134,7 +135,7 @@ public class PieceModel implements UnbakedModel {
 
         @Override
         public boolean useAmbientOcclusion() {
-            return false;
+            return true;
         }
 
         @Override
@@ -197,7 +198,7 @@ public class PieceModel implements UnbakedModel {
         @Nullable
         private StructureTemplate getStructure(BlockRenderView blockView, BlockPos blockPos) {
             // Nbt of structure is passed
-            Object entityData = ((RenderAttachedBlockView) blockView).getBlockEntityRenderAttachment(blockPos);
+            Object entityData = blockView.getBlockEntityRenderData(blockPos);
 
             // null or unknown type -> return null which is empty structure
             if (!(entityData instanceof NbtCompound structureNbt))
@@ -223,7 +224,11 @@ public class PieceModel implements UnbakedModel {
 //            ImmersiveChess.LOGGER.info("cache size " + meshCache.size());
 
             net.minecraft.util.math.random.Random random = randomSupplier.get();
-            RenderMaterial material = RendererAccess.INSTANCE.getRenderer().materialFinder().blendMode(BlendMode.TRANSLUCENT).ambientOcclusion(TriState.FALSE).find();
+            RenderMaterial material = RendererAccess.INSTANCE.getRenderer().materialFinder()
+                    .blendMode(BlendMode.TRANSLUCENT)
+                    .ambientOcclusion(TriState.DEFAULT)
+                    .emissive(false)
+                    .find();
             BlockModels blockModels = MinecraftClient.getInstance().getBakedModelManager().getBlockModels();
 
             AffineTransformation affineTransformation = rotationContainer.getRotation();
@@ -239,23 +244,15 @@ public class PieceModel implements UnbakedModel {
 
             // TODO: provide block entities from structure
             Map<BlockPos, BlockState> blockStates = StructureHelper.buildBlockStateMap(structure);
-            BlockRenderView world = createBlockRenderView(worldBlockView, blockStates);
+            BlockRenderView world = new MiniatureBlockRenderView(blockStates);
             Renderer renderer = RendererAccess.INSTANCE.getRenderer();
             MeshBuilder builder = renderer.meshBuilder();
             QuadEmitter emitter = builder.getEmitter();
 
 
-            BlockRenderContext renderContext = new BlockRenderContext() {
-                protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
-                    // Take the processed quad and add it to the mesh.
-                    emitter.copyFrom(quad);
-                    emitter.emit();
-                }
-            };
-
-            renderContext.pushTransform(rotationTransform);
-            renderContext.pushTransform(scaleTransform);
-            renderContext.pushTransform(materialTransform);
+//            renderContext.pushTransform(rotationTransform);
+//            renderContext.pushTransform(scaleTransform);
+//            renderContext.pushTransform(materialTransform);
 
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
@@ -264,100 +261,44 @@ public class PieceModel implements UnbakedModel {
                 QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
                 QuadTransform tintTransform = new QuadTransform.TintRemap(bs);
 
+
+                BlockRenderContext renderContext = new BlockRenderContext() {
+                    protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
+                        // Take the processed quad and add it to the mesh.
+                        emitter.copyFrom(quad);
+                        emitter.cullFace(null);
+
+                        tintTransform.transform(emitter);
+                        materialTransform.transform(emitter);
+                        translateTransform.transform(emitter);
+                        scaleTransform.transform(emitter);
+                        rotationTransform.transform(emitter);
+
+                        emitter.emit();
+                    }
+                };
+
                 // TODO: Could add support for blockState appearances, which may differ from actual block states (facades etc.)
                 //  However, they depend on direction
 //                bs = bs.getAppearance(world, pos, direction, bs, null);
 
                 BakedModel model = blockModels.getModel(bs);
 
-                renderContext.pushTransform(translateTransform);
-                renderContext.pushTransform(tintTransform);
+//                renderContext.pushTransform(translateTransform);
+//                renderContext.pushTransform(tintTransform);
 
                 // Have RenderContext perform most of the rendering, we intercept the result in the overide of "bufferQuad" above
                 renderContext.render(world, model, bs, pos, new MatrixStack(), null, true, random, 0, OverlayTexture.DEFAULT_UV);
 
-                renderContext.popTransform();
-                renderContext.popTransform();
+//                renderContext.popTransform();
+//                renderContext.popTransform();
             }
 
-            renderContext.popTransform();
-            renderContext.popTransform();
-            renderContext.popTransform();
+//            renderContext.popTransform();
+//            renderContext.popTransform();
+//            renderContext.popTransform();
 
             return builder.build();
         }
-
-        private BlockRenderView createBlockRenderView(BlockRenderView worldBlockView, Map<BlockPos, BlockState> blockStates) {
-            // TODO: extract class and turn into RenderBlockView that extends FabricBlockView
-            // TODO: when complete, should no longer need worldBlockView
-            return new RenderAttachedBlockView() {
-
-                @Override
-                public float getBrightness(Direction direction, boolean shaded) {
-                    // Brightness gets applied again when rendering to world, and we don't want it twice
-                    return 1;
-                }
-
-                @Override
-                public LightingProvider getLightingProvider() {
-                    // TODO: this is not correct
-                    return worldBlockView.getLightingProvider();
-
-//                    RenderAttachedBlockView view = this;
-//
-//                    return new LightingProvider(new ChunkProvider() {
-//                        @Nullable
-//                        @Override
-//                        public LightSourceView getChunk(int chunkX, int chunkZ) {
-//                            return null;
-//                        }
-//
-//                        @Override
-//                        public BlockView getWorld() {
-//                            return view;
-//                        }
-//                    }, true, true){
-//                        @Override
-//                        public int getLight(BlockPos pos, int ambientDarkness) {
-//                            return LightmapTextureManager.MAX_LIGHT_COORDINATE;
-//                        }
-//                    };
-                }
-
-                @Override
-                public int getColor(BlockPos pos, ColorResolver colorResolver) {
-                    // Ideally, we don't want to color the cached model yet, but have it get its color when placed.
-                    return ColorHelper.Argb.getArgb(255, 255, 255, 255);
-                }
-
-                @Override
-                public int getHeight() {
-                    return 16;
-                }
-
-                @Override
-                public int getBottomY() {
-                    return 0;
-                }
-
-                @Nullable
-                @Override
-                public BlockEntity getBlockEntity(BlockPos pos) {
-                    // TODO
-                    return null;
-                }
-
-                @Override
-                public BlockState getBlockState(BlockPos pos) {
-                    return blockStates.getOrDefault(pos, Blocks.VOID_AIR.getDefaultState());
-                }
-
-                @Override
-                public FluidState getFluidState(BlockPos pos) {
-                    return Fluids.EMPTY.getDefaultState();
-                }
-            };
-        }
-
     }
 }
