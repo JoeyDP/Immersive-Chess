@@ -98,8 +98,10 @@ public abstract class QuadTransform implements RenderContext.QuadTransform {
         public boolean transform(MutableQuadView quad) {
             // also update nominalFace
             Direction d = quad.nominalFace();
-            Vector3f newFacing = d.getUnitVector().mul(rotation);
-            quad.nominalFace(Direction.getFacing(newFacing.x, newFacing.y, newFacing.z));
+            if (d != null){
+                Vector3f newFacing = d.getUnitVector().mul(rotation);
+                quad.nominalFace(Direction.getFacing(newFacing.x, newFacing.y, newFacing.z));
+            }
             return super.transform(quad);
         }
 

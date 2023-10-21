@@ -6,7 +6,6 @@ import be.immersivechess.structure.StructureHelper;
 import com.google.common.collect.MapMaker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
@@ -17,14 +16,10 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.fabricmc.fabric.api.util.TriState;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
@@ -35,21 +30,16 @@ import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.AffineTransformation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.biome.ColorResolver;
-import net.minecraft.world.chunk.ChunkProvider;
-import net.minecraft.world.chunk.light.LightSourceView;
-import net.minecraft.world.chunk.light.LightingProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -249,11 +239,6 @@ public class PieceModel implements UnbakedModel {
             MeshBuilder builder = renderer.meshBuilder();
             QuadEmitter emitter = builder.getEmitter();
 
-
-//            renderContext.pushTransform(rotationTransform);
-//            renderContext.pushTransform(scaleTransform);
-//            renderContext.pushTransform(materialTransform);
-
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
                 BlockState bs = entry.getValue();
@@ -261,12 +246,13 @@ public class PieceModel implements UnbakedModel {
                 QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
                 QuadTransform tintTransform = new QuadTransform.TintRemap(bs);
 
-
                 BlockRenderContext renderContext = new BlockRenderContext() {
                     protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
                         // Take the processed quad and add it to the mesh.
                         emitter.copyFrom(quad);
                         emitter.cullFace(null);
+                        // setting cullFace to null also sets nominalFace (this might be a bug in the renderer)
+                        emitter.nominalFace(quad.nominalFace());
 
                         tintTransform.transform(emitter);
                         materialTransform.transform(emitter);
@@ -284,19 +270,9 @@ public class PieceModel implements UnbakedModel {
 
                 BakedModel model = blockModels.getModel(bs);
 
-//                renderContext.pushTransform(translateTransform);
-//                renderContext.pushTransform(tintTransform);
-
                 // Have RenderContext perform most of the rendering, we intercept the result in the overide of "bufferQuad" above
                 renderContext.render(world, model, bs, pos, new MatrixStack(), null, true, random, 0, OverlayTexture.DEFAULT_UV);
-
-//                renderContext.popTransform();
-//                renderContext.popTransform();
             }
-
-//            renderContext.popTransform();
-//            renderContext.popTransform();
-//            renderContext.popTransform();
 
             return builder.build();
         }

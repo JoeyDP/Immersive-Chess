@@ -1,6 +1,5 @@
 package be.immersivechess.client.render.model;
 
-import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -17,7 +16,6 @@ import net.minecraft.world.chunk.ChunkProvider;
 import net.minecraft.world.chunk.light.ChunkSkyLight;
 import net.minecraft.world.chunk.light.LightSourceView;
 import net.minecraft.world.chunk.light.LightingProvider;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -37,24 +35,6 @@ public class MiniatureBlockRenderView implements BlockRenderView, LightSourceVie
     }
 
     private LightingProvider createLightingProvider() {
-        // TODO: check whether light values are computed
-        LightingProvider p = getProvider();
-
-        // enable light updates for the chunk
-        p.setSectionStatus(new BlockPos(0, 0, 0), false);
-        p.setColumnEnabled(new ChunkPos(0, 0), true);
-
-        // enable adjacent chunk columns for propper skylight propagation
-        p.setColumnEnabled(new ChunkPos(-1, 0), true);
-        p.setColumnEnabled(new ChunkPos(0, -1), true);
-
-        p.doLightUpdates();
-
-        return p;
-    }
-
-    @NotNull
-    private LightingProvider getProvider() {
         LightSourceView view = this;
         ChunkProvider chunkProvider = new ChunkProvider() {
             @Nullable
@@ -73,6 +53,12 @@ public class MiniatureBlockRenderView implements BlockRenderView, LightSourceVie
 
         // always use skylight, because this would have to depend on where the piece is built and we don't store this info.
         LightingProvider p = new LightingProvider(chunkProvider, true, true);
+
+        // enable light updates for the chunk
+        p.setSectionStatus(new BlockPos(0, 0, 0), false);
+        p.propagateLight(new ChunkPos(0, 0));
+        p.doLightUpdates();
+
         return p;
     }
 
