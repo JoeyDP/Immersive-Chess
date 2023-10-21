@@ -160,20 +160,20 @@ public class PieceStandModel implements UnbakedModel {
 
         @Override
         public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos blockPos, Supplier<Random> randomSupplier, RenderContext renderContext) {
-            renderContext.bakedModelConsumer().accept(standModel);
+            standModel.emitBlockQuads(blockView, state, blockPos, randomSupplier, renderContext);
             renderContext.pushTransform(new QuadTransform.Scale(0.5f));
             renderContext.pushTransform(new QuadTransform.Translate(0.5f, 3/8f, 0.5f));
-            ((FabricBakedModel) pieceModel).emitBlockQuads(blockView, state, blockPos, randomSupplier, renderContext);
+            pieceModel.emitBlockQuads(blockView, state, blockPos, randomSupplier, renderContext);
             renderContext.popTransform();
             renderContext.popTransform();
         }
 
         @Override
         public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext renderContext) {
-            renderContext.bakedModelConsumer().accept(standModel);
+            standModel.emitItemQuads(stack, randomSupplier, renderContext);
             renderContext.pushTransform(new QuadTransform.Scale(0.5f));
             renderContext.pushTransform(new QuadTransform.Translate(0.5f, 3/8f, 0.5f));
-            ((FabricBakedModel) pieceModel).emitItemQuads(stack, randomSupplier, renderContext);
+            pieceModel.emitItemQuads(stack, randomSupplier, renderContext);
             renderContext.popTransform();
             renderContext.popTransform();
         }
