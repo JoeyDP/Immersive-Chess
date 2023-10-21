@@ -18,18 +18,22 @@ import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.fabricmc.fabric.api.util.TriState;
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockModels;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
@@ -240,27 +244,18 @@ public class PieceModel implements UnbakedModel {
             MeshBuilder builder = renderer.meshBuilder();
             QuadEmitter emitter = builder.getEmitter();
 
-//            VertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
-
-            BlockRenderInfo blockRenderInfo = new BlockRenderInfo();
-            blockRenderInfo.prepareForWorld(world, true);
-
-            ForwardingEmitter myEmitter = new ForwardingEmitter(emitter, blockRenderInfo);
 
             BlockRenderContext renderContext = new BlockRenderContext() {
-                @Override
-                public QuadEmitter getEmitter() {
-                    return myEmitter;
-                }
-
-                @Override
-                public QuadEmitter getVanillaModelEmitter() {
-                    return myEmitter;
+                protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
+                    // Take the processed quad and add it to the mesh.
+                    emitter.copyFrom(quad);
+                    emitter.emit();
                 }
             };
 
-            myEmitter.pushTransform(rotationTransform);
-            myEmitter.pushTransform(scaleTransform);
+            renderContext.pushTransform(rotationTransform);
+            renderContext.pushTransform(scaleTransform);
+            renderContext.pushTransform(materialTransform);
 
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
@@ -275,24 +270,19 @@ public class PieceModel implements UnbakedModel {
 
                 BakedModel model = blockModels.getModel(bs);
 
-                myEmitter.pushTransform(translateTransform);
-                myEmitter.pushTransform(materialTransform);
-                myEmitter.pushTransform(tintTransform);
+                renderContext.pushTransform(translateTransform);
+                renderContext.pushTransform(tintTransform);
 
-                // TODO: issue when rendering to emitter, it applies color and doesn't supply tintIndex anymore
-//              renderContext.render(world, model, bs, pos, new MatrixStack(), vertexConsumer, true, random, 0, OverlayTexture.DEFAULT_UV);
+                // Have RenderContext perform most of the rendering, we intercept the result in the overide of "bufferQuad" above
+                renderContext.render(world, model, bs, pos, new MatrixStack(), null, true, random, 0, OverlayTexture.DEFAULT_UV);
 
-                blockRenderInfo.prepareForBlock(bs, pos, model.useAmbientOcclusion());
-
-                model.emitBlockQuads(world, bs, pos, randomSupplier, renderContext);
-
-                myEmitter.popTransform();
-                myEmitter.popTransform();
-                myEmitter.popTransform();
+                renderContext.popTransform();
+                renderContext.popTransform();
             }
 
-            myEmitter.popTransform();
-            myEmitter.popTransform();
+            renderContext.popTransform();
+            renderContext.popTransform();
+            renderContext.popTransform();
 
             return builder.build();
         }
