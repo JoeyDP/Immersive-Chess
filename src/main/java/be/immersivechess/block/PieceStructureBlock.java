@@ -1,6 +1,5 @@
 package be.immersivechess.block;
 
-import be.immersivechess.ImmersiveChess;
 import be.immersivechess.block.entity.PieceStructureBlockEntity;
 import be.immersivechess.item.Items;
 import be.immersivechess.item.PieceContainer;
@@ -18,7 +17,9 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockBox;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;

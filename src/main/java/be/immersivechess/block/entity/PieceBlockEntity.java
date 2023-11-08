@@ -74,10 +74,4 @@ public class PieceBlockEntity extends StructureRenderedBlockEntity {
             nbt.put(NBT_GAME_INFO, gameInfo);
         }
     }
-
-    @Override
-    public @Nullable Object getRenderAttachmentData() {
-        // null is used to indicate the default model should be used so this case is handled
-        return getStructureNbt();
-    }
 }

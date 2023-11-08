@@ -24,6 +24,14 @@ public abstract class StructureRenderedBlockEntity extends BlockEntity implement
         super(type, pos, state);
     }
 
+    /**
+     * Whether the structure contains at least one light source (can be hidden, this is not checked).
+     */
+    public boolean containsLightSource(){
+        // TODO: implement
+        return true;
+    }
+
     @Override
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);

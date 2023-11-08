@@ -24,12 +24,14 @@ import java.util.function.BiConsumer;
 public class MiniatureBlockRenderView implements BlockRenderView, LightSourceView {
 
     private final Map<BlockPos, BlockState> blockStates;
+    private final Map<BlockPos, BlockEntity> blockEntities;
 
     private final ChunkSkyLight chunkSkyLight;
     private final LightingProvider lightingProvider;
 
-    public MiniatureBlockRenderView(Map<BlockPos, BlockState> blockStates) {
+    public MiniatureBlockRenderView(Map<BlockPos, BlockState> blockStates, Map<BlockPos, BlockEntity> blockEntities) {
         this.blockStates = blockStates;
+        this.blockEntities = blockEntities;
         chunkSkyLight = new ChunkSkyLight(this);
         lightingProvider = createLightingProvider();
     }
@@ -92,8 +94,7 @@ public class MiniatureBlockRenderView implements BlockRenderView, LightSourceVie
     @Nullable
     @Override
     public BlockEntity getBlockEntity(BlockPos pos) {
-        // TODO
-        return null;
+        return blockEntities.get(pos);
     }
 
     @Override
@@ -103,7 +104,7 @@ public class MiniatureBlockRenderView implements BlockRenderView, LightSourceVie
 
     @Override
     public FluidState getFluidState(BlockPos pos) {
-        return Fluids.EMPTY.getDefaultState();
+        return getBlockState(pos).getFluidState();
     }
 
     @Override

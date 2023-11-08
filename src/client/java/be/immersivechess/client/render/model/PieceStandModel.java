@@ -120,7 +120,7 @@ public class PieceStandModel implements UnbakedModel {
 
         @Override
         public boolean useAmbientOcclusion() {
-            return false;
+            return true;
         }
 
         @Override

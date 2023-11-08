@@ -24,6 +24,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockModels;
+import net.minecraft.client.render.block.FluidRenderer;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
@@ -42,10 +43,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -234,7 +232,7 @@ public class PieceModel implements UnbakedModel {
 
             // TODO: provide block entities from structure
             Map<BlockPos, BlockState> blockStates = StructureHelper.buildBlockStateMap(structure);
-            BlockRenderView world = new MiniatureBlockRenderView(blockStates);
+            BlockRenderView world = new MiniatureBlockRenderView(blockStates, new HashMap<>());
             Renderer renderer = RendererAccess.INSTANCE.getRenderer();
             MeshBuilder builder = renderer.meshBuilder();
             QuadEmitter emitter = builder.getEmitter();
@@ -246,6 +244,7 @@ public class PieceModel implements UnbakedModel {
                 QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
                 QuadTransform tintTransform = new QuadTransform.TintRemap(bs);
 
+                // TODO: extract from hot loop
                 BlockRenderContext renderContext = new BlockRenderContext() {
                     protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
                         // Take the processed quad and add it to the mesh.

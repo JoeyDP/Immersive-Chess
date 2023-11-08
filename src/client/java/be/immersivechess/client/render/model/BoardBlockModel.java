@@ -158,8 +158,7 @@ public class BoardBlockModel implements UnbakedModel {
 
         @Override
         public boolean useAmbientOcclusion() {
-            // TODO: should depend on material, but would have to make different types of board blocks..
-            return false;
+            return true;
         }
 
         @Override
