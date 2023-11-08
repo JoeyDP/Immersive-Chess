@@ -22,6 +22,7 @@ import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
@@ -236,7 +237,8 @@ public class PieceModel implements UnbakedModel {
 
             // TODO: provide block entities from structure
             Map<BlockPos, BlockState> blockStates = StructureHelper.buildBlockStateMap(structure);
-            BlockRenderView world = new MiniatureBlockRenderView(blockStates, new HashMap<>());
+            Map<BlockPos, BlockEntity> blockEntities = StructureHelper.buildBlockEntityMap(structure);
+            BlockRenderView world = new MiniatureBlockRenderView(blockStates, blockEntities);
             Renderer renderer = RendererAccess.INSTANCE.getRenderer();
             MeshBuilder builder = renderer.meshBuilder();
             QuadEmitter emitter = builder.getEmitter();

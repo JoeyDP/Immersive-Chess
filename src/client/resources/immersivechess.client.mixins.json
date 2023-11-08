@@ -3,8 +3,7 @@
   "package": "be.immersivechess.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "SpriteContentsAccess",
-    "BlockRenderInfoAccess"
+    "SpriteContentsAccess"
   ],
   "injectors": {
     "defaultRequire": 1
