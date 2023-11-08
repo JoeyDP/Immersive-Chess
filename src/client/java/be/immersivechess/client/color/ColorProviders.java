@@ -1,5 +1,6 @@
 package be.immersivechess.client.color;
 
+import be.immersivechess.ImmersiveChess;
 import be.immersivechess.block.Blocks;
 import be.immersivechess.block.PieceStandBlock;
 import be.immersivechess.block.entity.DyedStructureRenderedBlockEntity;

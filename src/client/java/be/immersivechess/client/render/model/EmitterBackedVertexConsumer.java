@@ -2,6 +2,7 @@ package be.immersivechess.client.render.model;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.render.FixedColorVertexConsumer;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumer;
@@ -11,7 +12,7 @@ class EmitterBackedVertexConsumer extends FixedColorVertexConsumer {
     int index = 0;
     QuadEmitter emitter;
 
-    private final ObjectArrayList<QuadTransform> transformStack = new ObjectArrayList<>();
+    private final ObjectArrayList<RenderContext.QuadTransform> transformStack = new ObjectArrayList<>();
 
 
     public EmitterBackedVertexConsumer(QuadEmitter emitter) {
@@ -63,7 +64,7 @@ class EmitterBackedVertexConsumer extends FixedColorVertexConsumer {
         index = (index + 1) % 4;
     }
 
-    public void pushTransform(QuadTransform transform){
+    public void pushTransform(RenderContext.QuadTransform transform){
         transformStack.add(transform);
     }
 

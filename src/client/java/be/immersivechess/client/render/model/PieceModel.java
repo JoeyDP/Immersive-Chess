@@ -1,5 +1,6 @@
 package be.immersivechess.client.render.model;
 
+import be.immersivechess.client.color.TintMapper;
 import be.immersivechess.client.structure.StructureResolver;
 import be.immersivechess.logic.Piece;
 import be.immersivechess.structure.StructureHelper;
@@ -33,6 +34,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PlayerScreenHandler;
@@ -239,6 +241,11 @@ public class PieceModel implements UnbakedModel {
             MeshBuilder builder = renderer.meshBuilder();
             QuadEmitter emitter = builder.getEmitter();
 
+            // For fluids
+            EmitterBackedVertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
+            vertexConsumer.pushTransform(rotationTransform);
+            vertexConsumer.pushTransform(scaleTransform);
+
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
                 BlockState bs = entry.getValue();
@@ -277,21 +284,19 @@ public class PieceModel implements UnbakedModel {
                 // Fluids are rendered by intercepting the quads rendered to a vertexconsumer and putting them in an emitter.
                 FluidState fluidState = bs.getFluidState();
                 if (!fluidState.isEmpty()) {
-                    EmitterBackedVertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
+                    boolean isWater = fluidState.getFluid() == Fluids.WATER || fluidState.getFluid() == Fluids.FLOWING_WATER;
 
-                    vertexConsumer.pushTransform(rotationTransform);
-                    vertexConsumer.pushTransform(scaleTransform);
-
-                    vertexConsumer.pushTransform(materialTransform);
-                    vertexConsumer.pushTransform(tintTransform);
+                    if (isWater)
+                        vertexConsumer.pushTransform(quad -> {
+                                    quad.colorIndex(TintMapper.INSTANCE.WATER_COLOR_OFFSET);
+                                    return true;
+                                }
+                        );
 
                     MinecraftClient.getInstance().getBlockRenderManager().renderFluid(pos, world, vertexConsumer, bs, fluidState);
 
-                    vertexConsumer.popTransform();
-                    vertexConsumer.popTransform();
-
-                    vertexConsumer.popTransform();
-                    vertexConsumer.popTransform();
+                    if (isWater)
+                        vertexConsumer.popTransform();
                 }
             }
 
