@@ -92,6 +92,7 @@ public class Blocks {
                         .pistonBehavior(PistonBehavior.BLOCK)   // redundant because it already has an entity
                         .strength(3f)
                         .nonOpaque()
+                        .ticksRandomly()
                         .dynamicBounds(),
                 piece));
     }

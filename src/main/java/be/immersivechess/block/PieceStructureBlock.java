@@ -61,6 +61,14 @@ public class PieceStructureBlock extends BlockWithEntity implements PieceContain
     }
 
     /**
+     * By default, randomTick will call scheduledTick, which updates the structure and redraws the model.
+     */
+    @Override
+    public boolean hasRandomTicks(BlockState state) {
+        return !state.get(EMPTY);
+    }
+
+    /**
      * Called from PieceStructureBlockEntity when the structure needs to be updated.
      */
     @Override

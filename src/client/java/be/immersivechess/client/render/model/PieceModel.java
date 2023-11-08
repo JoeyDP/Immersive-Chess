@@ -19,6 +19,7 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.util.TriState;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
+import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
@@ -31,6 +32,7 @@ import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PlayerScreenHandler;
@@ -271,6 +273,26 @@ public class PieceModel implements UnbakedModel {
 
                 // Have RenderContext perform most of the rendering, we intercept the result in the overide of "bufferQuad" above
                 renderContext.render(world, model, bs, pos, new MatrixStack(), null, true, random, 0, OverlayTexture.DEFAULT_UV);
+
+                // Fluids are rendered by intercepting the quads rendered to a vertexconsumer and putting them in an emitter.
+                FluidState fluidState = bs.getFluidState();
+                if (!fluidState.isEmpty()) {
+                    EmitterBackedVertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
+
+                    vertexConsumer.pushTransform(rotationTransform);
+                    vertexConsumer.pushTransform(scaleTransform);
+
+                    vertexConsumer.pushTransform(materialTransform);
+                    vertexConsumer.pushTransform(tintTransform);
+
+                    MinecraftClient.getInstance().getBlockRenderManager().renderFluid(pos, world, vertexConsumer, bs, fluidState);
+
+                    vertexConsumer.popTransform();
+                    vertexConsumer.popTransform();
+
+                    vertexConsumer.popTransform();
+                    vertexConsumer.popTransform();
+                }
             }
 
             return builder.build();
