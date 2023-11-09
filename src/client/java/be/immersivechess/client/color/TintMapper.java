@@ -15,6 +15,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 /**
  * Builds a mapping between tintIndices and colorProviders.
  */
@@ -56,13 +58,13 @@ public class TintMapper{
         return BLOCK_PROVIDER_TINT_OFFSETS.inverse().getOrDefault(offset, null);
     }
 
-    public int getTintOffset(@Nullable BlockColorProvider provider){
+    public Optional<Integer> getTintOffset(@Nullable BlockColorProvider provider){
         if (provider == null)
-            return 0;
-        return BLOCK_PROVIDER_TINT_OFFSETS.getOrDefault(provider, -1);
+            return Optional.of(0);
+        return Optional.ofNullable(BLOCK_PROVIDER_TINT_OFFSETS.get(provider));
     }
 
-    public int getTintOffset(Block block){
+    public Optional<Integer> getTintOffset(Block block){
         BlockColorProvider provider = ColorProviderRegistry.BLOCK.get(block);
         return getTintOffset(provider);
     }
