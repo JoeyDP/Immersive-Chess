@@ -1,7 +1,9 @@
 package be.immersivechess.client.render.model;
 
 import be.immersivechess.ImmersiveChess;
+import be.immersivechess.block.entity.StructureRenderedBlockEntity;
 import be.immersivechess.client.color.TintMapper;
+import be.immersivechess.item.PieceContainer;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.block.BlockState;
@@ -128,14 +130,21 @@ public abstract class QuadTransform implements RenderContext.QuadTransform {
         @Override
         public boolean transform(MutableQuadView quad) {
             int tintIndex = quad.colorIndex();
-            if (tintIndex > -1){
-                // we do not expect the tintIndex to exceed our allocated capacity.
-                if (tintIndex > TintMapper.CAPACITY)
-                    ImmersiveChess.LOGGER.warn("tintIndex exceeds allocated capacity. Some colors may get translated wrong.");
 
-                int offset = TintMapper.INSTANCE.getTintOffset(bs.getBlock());
-                quad.colorIndex(offset + tintIndex);
-            }
+            if (tintIndex < 0)
+                return true;
+
+            // Don't remap recursively (PieceContainer indicates StructureRenderedBlockEntity in this case)
+            if (bs.getBlock() instanceof PieceContainer)
+                return true;
+
+            // we do not expect the tintIndex to exceed our allocated capacity.
+            if (tintIndex > TintMapper.CAPACITY)
+                ImmersiveChess.LOGGER.warn("tintIndex exceeds allocated capacity. Some colors may get translated wrong.");
+
+            int offset = TintMapper.INSTANCE.getTintOffset(bs.getBlock());
+            quad.colorIndex(offset + tintIndex);
+
             return true;
         }
     }
