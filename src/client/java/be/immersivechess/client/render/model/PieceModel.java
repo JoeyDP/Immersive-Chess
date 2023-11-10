@@ -1,5 +1,6 @@
 package be.immersivechess.client.render.model;
 
+import be.immersivechess.ImmersiveChess;
 import be.immersivechess.client.color.TintMapper;
 import be.immersivechess.client.structure.ClientStructureResolver;
 import be.immersivechess.logic.Piece;
@@ -21,12 +22,15 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.util.TriState;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.block.BlockModels;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
@@ -303,6 +307,25 @@ public class PieceModel implements UnbakedModel {
                     if (isWater)
                         vertexConsumer.popTransform();
                 }
+
+
+                // Rendering block entities statically
+                // TODO: execute rendering on render thread
+                // TODO: figure out start/end drawing calls for correct texture etc.
+                vertexConsumer.pushTransform(translateTransform);
+                int light = WorldRenderer.getLightmapCoordinates(world, pos);
+                BlockEntity be = blockEntities.get(pos);
+                if (bs.getRenderType() != BlockRenderType.MODEL && be != null){
+                    ImmersiveChess.LOGGER.info("Rendering BE");
+                    BlockEntityRenderer<BlockEntity> beRenderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(be);
+                    if (beRenderer != null)
+                        beRenderer.render(be, 0, new MatrixStack(), layer -> {
+//                            layer.startDrawing();
+                            return vertexConsumer;
+                        }, light, OverlayTexture.DEFAULT_UV);
+                }
+                vertexConsumer.popTransform();
+
             }
 
             return builder.build();
