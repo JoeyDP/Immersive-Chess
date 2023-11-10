@@ -59,7 +59,6 @@ public class StructureResolver {
     }
 
     @Nullable
-    @Environment(EnvType.CLIENT)
     public static StructureTemplate getStructure(ItemStack stack){
         if (!(stack.getItem() instanceof PieceContainer pieceContainer))
             return null;

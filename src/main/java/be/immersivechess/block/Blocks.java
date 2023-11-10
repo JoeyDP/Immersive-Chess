@@ -33,6 +33,7 @@ public class Blocks {
                     .create()
                     .mapColor(MapColor.GOLD)
                     .pistonBehavior(PistonBehavior.DESTROY)
+                    .notSolid()
                     .strength(0.3f)
                     .nonOpaque()));
 
@@ -59,6 +60,7 @@ public class Blocks {
                                         .orElse(false))
                         .mapColor(MapColor.CLEAR)
                         .pistonBehavior(PistonBehavior.BLOCK)
+                        .solid()
                         .hardness(0f)
                         .resistance(3600000.0f)
                         .nonOpaque()
@@ -76,6 +78,7 @@ public class Blocks {
                                 .orElse(false))
                         .mapColor(piece.getColor() == Color.WHITE ? MapColor.WHITE : MapColor.BLACK)
                         .pistonBehavior(PistonBehavior.DESTROY)
+                        .notSolid()
                         .strength(0.3f)
                         .nonOpaque(),
                 piece)
@@ -90,6 +93,7 @@ public class Blocks {
                                 .map(StructureRenderedBlockEntity::containsLightSource)
                                 .orElse(false))
                         .pistonBehavior(PistonBehavior.BLOCK)   // redundant because it already has an entity
+                        .solid()
                         .strength(3f)
                         .nonOpaque()
                         .ticksRandomly()
