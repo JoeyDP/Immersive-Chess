@@ -8,7 +8,8 @@ import be.immersivechess.client.gui.ChessGameScreen;
 import be.immersivechess.client.render.block.entity.BoardBlockEntityRenderer;
 import be.immersivechess.client.render.block.entity.PieceStructureBlockEntityRenderer;
 import be.immersivechess.client.render.model.ModelProvider;
-import be.immersivechess.client.structure.StructureResolver;
+import be.immersivechess.client.structure.ClientStructureResolver;
+import be.immersivechess.structure.StructureResolver;
 import be.immersivechess.item.ChessCase;
 import be.immersivechess.item.Items;
 import be.immersivechess.item.PieceContainer;
@@ -25,16 +26,12 @@ import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
-import net.minecraft.item.DyeableItem;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.structure.StructureTemplate;
-import net.minecraft.structure.StructureTemplateManager;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
 
 @Environment(EnvType.CLIENT)
 public class ImmersiveChessClient implements ClientModInitializer {
@@ -82,7 +79,7 @@ public class ImmersiveChessClient implements ClientModInitializer {
     private static void addPieceStands(FabricItemGroupEntries content){
         Items.PIECE_STANDS.values().forEach(pieceStandItem -> {
             ItemStack stand = new ItemStack(pieceStandItem);
-            StructureTemplate structure = StructureResolver.getDefaultStructure(pieceStandItem.getPiece());
+            StructureTemplate structure = ClientStructureResolver.getDefaultStructure(pieceStandItem.getPiece());
             PieceContainer.writeStructureNbt(stand, structure.writeNbt(new NbtCompound()));
             content.add(stand);
         });

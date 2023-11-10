@@ -1,9 +1,10 @@
 package be.immersivechess.client.render.model;
 
 import be.immersivechess.client.color.TintMapper;
-import be.immersivechess.client.structure.StructureResolver;
+import be.immersivechess.client.structure.ClientStructureResolver;
 import be.immersivechess.logic.Piece;
 import be.immersivechess.structure.StructureHelper;
+import be.immersivechess.world.MiniatureBlockRenderView;
 import com.google.common.collect.MapMaker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,14 +21,12 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.util.TriState;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockModels;
-import net.minecraft.client.render.block.FluidRenderer;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
@@ -37,7 +36,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.Identifier;
@@ -48,7 +46,10 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -194,18 +195,20 @@ public class PieceModel implements UnbakedModel {
             Object entityData = blockView.getBlockEntityRenderData(blockPos);
 
             // null or unknown type -> return null which is empty structure
-            if (!(entityData instanceof NbtCompound structureNbt))
+            if (!(entityData instanceof StructureTemplate structure))
                 return null;
 
-            // empty nbt is also rendered as empty
-            if (structureNbt.isEmpty())
-                return null;
+            return structure;
 
-            return StructureResolver.getStructure(structureNbt);
+//            // empty nbt is also rendered as empty
+//            if (structureNbt.isEmpty())
+//                return null;
+
+//            return StructureResolver.getStructure(structureNbt);
         }
 
         private StructureTemplate getStructure(ItemStack itemStack) {
-            return StructureResolver.getStructure(itemStack);
+            return ClientStructureResolver.getStructure(itemStack);
         }
 
         private Mesh getOrCreateMesh(StructureTemplate structure, BlockRenderView worldBlockView, Supplier<Random> randomSupplier) {

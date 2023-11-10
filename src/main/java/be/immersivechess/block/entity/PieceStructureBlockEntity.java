@@ -24,7 +24,6 @@ import net.minecraft.world.event.PositionSource;
 import net.minecraft.world.event.listener.GameEventListener;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Set;
 
 public class PieceStructureBlockEntity extends DyedStructureRenderedBlockEntity implements GameEventListener {
@@ -50,7 +49,7 @@ public class PieceStructureBlockEntity extends DyedStructureRenderedBlockEntity 
     }
 
     public void updateStructure() {
-        setStructure(buildStructureNbtFromWorld());
+        setStructureNbt(buildStructureNbtFromWorld());
     }
 
     public ItemStack getContent() {
@@ -106,7 +105,7 @@ public class PieceStructureBlockEntity extends DyedStructureRenderedBlockEntity 
         return structureNbt;
     }
 
-    private static BlockRotation facingToRotation(Direction facing) {
+    public static BlockRotation facingToRotation(Direction facing) {
         return switch (facing) {
             case DOWN -> throw new IllegalStateException("Invalid facing direction of PieceStructureBlock: " + facing);
             case UP -> throw new IllegalStateException("Invalid facing direction of PieceStructureBlock: " + facing);

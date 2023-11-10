@@ -1,4 +1,4 @@
-package be.immersivechess.client.render.model;
+package be.immersivechess.world;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
