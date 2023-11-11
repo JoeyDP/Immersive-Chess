@@ -199,12 +199,6 @@ public class PieceModel implements UnbakedModel {
                 return null;
 
             return structure;
-
-//            // empty nbt is also rendered as empty
-//            if (structureNbt.isEmpty())
-//                return null;
-
-//            return StructureResolver.getStructure(structureNbt);
         }
 
         private StructureTemplate getStructure(ItemStack itemStack) {
@@ -219,17 +213,37 @@ public class PieceModel implements UnbakedModel {
 //            ImmersiveChess.LOGGER.info("creating new mesh for piece " + piece);
 //            ImmersiveChess.LOGGER.info("cache size " + meshCache.size());
 
+            // Transformations
+            AffineTransformation affineTransformation = rotationContainer.getRotation();
+            QuadTransform rotationTransform = new QuadTransform.Rotate(affineTransformation.getLeftRotation());
+            QuadTransform scaleTransform = new QuadTransform.Scale(SCALE);
+
+            // Build view of structure world
+            Map<BlockPos, BlockState> blockStates = StructureHelper.buildBlockStateMap(structure);
+            Map<BlockPos, BlockEntity> blockEntities = StructureHelper.buildBlockEntityMap(structure);
+            BlockRenderView world = new MiniatureBlockRenderView(blockStates, blockEntities);
+
+            // QuadEmitter
+            Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+            MeshBuilder builder = renderer.meshBuilder();
+            QuadEmitter emitter = builder.getEmitter();
+
+            // Rendering
+            renderBlocks(blockStates, world, emitter, randomSupplier, rotationTransform, scaleTransform);
+            renderFluids(blockStates, world, emitter, rotationTransform, scaleTransform);
+
+            return builder.build();
+        }
+
+        private void renderBlocks(Map<BlockPos, BlockState> blockStates, BlockRenderView world, QuadEmitter emitter, Supplier<Random> randomSupplier, QuadTransform rotationTransform, QuadTransform scaleTransform) {
             net.minecraft.util.math.random.Random random = randomSupplier.get();
+            BlockModels blockModels = MinecraftClient.getInstance().getBakedModelManager().getBlockModels();
+
             RenderMaterial material = RendererAccess.INSTANCE.getRenderer().materialFinder()
                     .blendMode(BlendMode.TRANSLUCENT)
                     .ambientOcclusion(TriState.DEFAULT)
                     .emissive(false)
                     .find();
-            BlockModels blockModels = MinecraftClient.getInstance().getBakedModelManager().getBlockModels();
-
-            AffineTransformation affineTransformation = rotationContainer.getRotation();
-            QuadTransform rotationTransform = new QuadTransform.Rotate(affineTransformation.getLeftRotation());
-            QuadTransform scaleTransform = new QuadTransform.Scale(SCALE);
             QuadTransform materialTransform = new QuadTransform() {
                 @Override
                 public boolean transform(MutableQuadView quad) {
@@ -238,22 +252,11 @@ public class PieceModel implements UnbakedModel {
                 }
             };
 
-            // TODO: provide block entities from structure
-            Map<BlockPos, BlockState> blockStates = StructureHelper.buildBlockStateMap(structure);
-            Map<BlockPos, BlockEntity> blockEntities = StructureHelper.buildBlockEntityMap(structure);
-            BlockRenderView world = new MiniatureBlockRenderView(blockStates, blockEntities);
-            Renderer renderer = RendererAccess.INSTANCE.getRenderer();
-            MeshBuilder builder = renderer.meshBuilder();
-            QuadEmitter emitter = builder.getEmitter();
-
-            // For fluids
-            EmitterBackedVertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
-            vertexConsumer.pushTransform(rotationTransform);
-            vertexConsumer.pushTransform(scaleTransform);
-
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
                 BlockState bs = entry.getValue();
+
+                if (bs.isAir()) continue;
 
                 QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
                 QuadTransform tintTransform = new QuadTransform.TintRemap(bs);
@@ -285,27 +288,39 @@ public class PieceModel implements UnbakedModel {
 
                 // Have RenderContext perform most of the rendering, we intercept the result in the overide of "bufferQuad" above
                 renderContext.render(world, model, bs, pos, new MatrixStack(), null, true, random, 0, OverlayTexture.DEFAULT_UV);
+            }
+        }
+
+        private void renderFluids(Map<BlockPos, BlockState> blockStates, BlockRenderView world, QuadEmitter emitter, QuadTransform rotationTransform, QuadTransform scaleTransform) {
+            // For fluids
+            EmitterBackedVertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
+            vertexConsumer.pushTransform(rotationTransform);
+            vertexConsumer.pushTransform(scaleTransform);
+
+            for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
+                BlockPos pos = entry.getKey();
+                BlockState bs = entry.getValue();
 
                 // Fluids are rendered by intercepting the quads rendered to a vertexconsumer and putting them in an emitter.
                 FluidState fluidState = bs.getFluidState();
-                if (!fluidState.isEmpty()) {
-                    boolean isWater = fluidState.getFluid() == Fluids.WATER || fluidState.getFluid() == Fluids.FLOWING_WATER;
+                if (fluidState.isEmpty())
+                    continue;
 
-                    if (isWater)
-                        vertexConsumer.pushTransform(quad -> {
-                                    quad.colorIndex(TintMapper.INSTANCE.WATER_COLOR_OFFSET);
-                                    return true;
-                                }
-                        );
+                boolean isWater = fluidState.getFluid() == Fluids.WATER || fluidState.getFluid() == Fluids.FLOWING_WATER;
+                if (isWater)
+                    vertexConsumer.pushTransform(quad -> {
+                                quad.colorIndex(TintMapper.INSTANCE.WATER_COLOR_OFFSET);
+                                return true;
+                            }
+                    );
 
-                    MinecraftClient.getInstance().getBlockRenderManager().renderFluid(pos, world, vertexConsumer, bs, fluidState);
+                MinecraftClient.getInstance().getBlockRenderManager().renderFluid(pos, world, vertexConsumer, bs, fluidState);
 
-                    if (isWater)
-                        vertexConsumer.popTransform();
-                }
+                if (isWater)
+                    vertexConsumer.popTransform();
             }
-
-            return builder.build();
         }
+
+
     }
 }
