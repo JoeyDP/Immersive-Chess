@@ -23,14 +23,11 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.util.TriState;
-import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockModels;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
@@ -179,7 +176,7 @@ public class PieceModel implements UnbakedModel {
             if (structure == null)
                 return;
 
-            Mesh mesh = getOrCreateMesh(structure, blockView, randomSupplier);
+            Mesh mesh = getOrCreateMesh(structure, randomSupplier);
             mesh.outputTo(renderContext.getEmitter());
         }
 
@@ -190,7 +187,7 @@ public class PieceModel implements UnbakedModel {
             if (structure == null)
                 return;
 
-            Mesh mesh = getOrCreateMesh(structure, MinecraftClient.getInstance().world, randomSupplier);
+            Mesh mesh = getOrCreateMesh(structure, randomSupplier);
             mesh.outputTo(renderContext.getEmitter());
         }
 
@@ -210,11 +207,11 @@ public class PieceModel implements UnbakedModel {
             return ClientStructureResolver.getStructure(itemStack);
         }
 
-        private Mesh getOrCreateMesh(StructureTemplate structure, BlockRenderView worldBlockView, Supplier<Random> randomSupplier) {
-            return meshCache.computeIfAbsent(structure, nbt -> createMesh(nbt, worldBlockView, randomSupplier));
+        private Mesh getOrCreateMesh(StructureTemplate structure, Supplier<Random> randomSupplier) {
+            return meshCache.computeIfAbsent(structure, nbt -> createMesh(nbt, randomSupplier));
         }
 
-        private Mesh createMesh(StructureTemplate structure, BlockRenderView worldBlockView, Supplier<Random> randomSupplier) {
+        private Mesh createMesh(StructureTemplate structure, Supplier<Random> randomSupplier) {
 //            ImmersiveChess.LOGGER.info("creating new mesh for piece " + piece);
 //            ImmersiveChess.LOGGER.info("cache size " + meshCache.size());
 

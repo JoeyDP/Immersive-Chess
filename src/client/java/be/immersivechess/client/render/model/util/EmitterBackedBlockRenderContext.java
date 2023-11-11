@@ -23,7 +23,7 @@ public class EmitterBackedBlockRenderContext extends BlockRenderContext implemen
     }
 
     /**
-     * Have RenderContext perform most of the rendering, we intercept the result in the overide of "bufferQuad"
+     * Have RenderContext perform most of the rendering, we intercept the result in the override of "bufferQuad"
      */
     @Override
     protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
@@ -34,7 +34,7 @@ public class EmitterBackedBlockRenderContext extends BlockRenderContext implemen
         emitter.nominalFace(quad.nominalFace());
 
         // We only want to transform after most of the rendering
-        // applytransform is our own transform stack. Default transform function should not do anything.
+        // postTransform is our own transform stack. Default transform function needs to not do anything.
         postTransform(emitter);
 
         emitter.emit();
