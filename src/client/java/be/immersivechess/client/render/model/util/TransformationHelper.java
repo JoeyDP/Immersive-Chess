@@ -1,4 +1,4 @@
-package be.immersivechess.client.render.model;
+package be.immersivechess.client.render.model.util;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

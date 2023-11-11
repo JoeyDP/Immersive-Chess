@@ -1,6 +1,10 @@
 package be.immersivechess.client.render.model;
 
 import be.immersivechess.client.color.TintMapper;
+import be.immersivechess.client.render.model.util.EmitterBackedBlockRenderContext;
+import be.immersivechess.client.render.model.util.EmitterBackedVertexConsumer;
+import be.immersivechess.client.render.model.util.QuadTransform;
+import be.immersivechess.client.render.model.util.TransformationHelper;
 import be.immersivechess.client.structure.ClientStructureResolver;
 import be.immersivechess.logic.Piece;
 import be.immersivechess.structure.StructureHelper;
@@ -21,6 +25,7 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.util.TriState;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -252,33 +257,24 @@ public class PieceModel implements UnbakedModel {
                 }
             };
 
+            EmitterBackedBlockRenderContext renderContext = new EmitterBackedBlockRenderContext(emitter);
+
+            renderContext.pushPostTransform(materialTransform);
+            renderContext.pushPostTransform(rotationTransform);
+            renderContext.pushPostTransform(scaleTransform);
+
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
                 BlockState bs = entry.getValue();
 
                 if (bs.isAir()) continue;
+                if (bs.getRenderType() != BlockRenderType.MODEL) continue;
 
                 QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
                 QuadTransform tintTransform = new QuadTransform.TintRemap(bs);
 
-                // TODO: extract from hot loop
-                BlockRenderContext renderContext = new BlockRenderContext() {
-                    protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
-                        // Take the processed quad and add it to the mesh.
-                        emitter.copyFrom(quad);
-                        emitter.cullFace(null);
-                        // setting cullFace to null also sets nominalFace (this might be a bug in the renderer)
-                        emitter.nominalFace(quad.nominalFace());
-
-                        tintTransform.transform(emitter);
-                        materialTransform.transform(emitter);
-                        translateTransform.transform(emitter);
-                        scaleTransform.transform(emitter);
-                        rotationTransform.transform(emitter);
-
-                        emitter.emit();
-                    }
-                };
+                renderContext.pushPostTransform(translateTransform);
+                renderContext.pushPostTransform(tintTransform);
 
                 // TODO: Could add support for blockState appearances, which may differ from actual block states (facades etc.)
                 //  However, they depend on direction
@@ -286,16 +282,19 @@ public class PieceModel implements UnbakedModel {
 
                 BakedModel model = blockModels.getModel(bs);
 
-                // Have RenderContext perform most of the rendering, we intercept the result in the overide of "bufferQuad" above
+                // Have RenderContext perform most of the rendering, we intercept the result and put it in the emitter.
                 renderContext.render(world, model, bs, pos, new MatrixStack(), null, true, random, 0, OverlayTexture.DEFAULT_UV);
+
+                renderContext.popPostTransform();
+                renderContext.popPostTransform();
             }
         }
 
         private void renderFluids(Map<BlockPos, BlockState> blockStates, BlockRenderView world, QuadEmitter emitter, QuadTransform rotationTransform, QuadTransform scaleTransform) {
             // For fluids
             EmitterBackedVertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
-            vertexConsumer.pushTransform(rotationTransform);
-            vertexConsumer.pushTransform(scaleTransform);
+            vertexConsumer.pushPostTransform(rotationTransform);
+            vertexConsumer.pushPostTransform(scaleTransform);
 
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
@@ -308,7 +307,7 @@ public class PieceModel implements UnbakedModel {
 
                 boolean isWater = fluidState.getFluid() == Fluids.WATER || fluidState.getFluid() == Fluids.FLOWING_WATER;
                 if (isWater)
-                    vertexConsumer.pushTransform(quad -> {
+                    vertexConsumer.pushPostTransform(quad -> {
                                 quad.colorIndex(TintMapper.INSTANCE.WATER_COLOR_OFFSET);
                                 return true;
                             }
@@ -317,7 +316,7 @@ public class PieceModel implements UnbakedModel {
                 MinecraftClient.getInstance().getBlockRenderManager().renderFluid(pos, world, vertexConsumer, bs, fluidState);
 
                 if (isWater)
-                    vertexConsumer.popTransform();
+                    vertexConsumer.popPostTransform();
             }
         }
 

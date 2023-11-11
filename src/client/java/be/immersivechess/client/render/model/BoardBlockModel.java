@@ -2,6 +2,7 @@ package be.immersivechess.client.render.model;
 
 import be.immersivechess.ImmersiveChess;
 import be.immersivechess.block.Blocks;
+import be.immersivechess.client.render.model.util.QuadTransform;
 import ch.astorm.jchess.core.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
