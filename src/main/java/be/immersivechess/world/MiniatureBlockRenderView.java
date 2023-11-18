@@ -38,6 +38,7 @@ public class MiniatureBlockRenderView implements BlockRenderView, LightSourceVie
     public MiniatureBlockRenderView(Map<BlockPos, BlockState> blockStates, Map<BlockPos, BlockEntity> blockEntities) {
         this.blockStates = blockStates;
         this.blockEntities = blockEntities;
+
         chunkSkyLight = new ChunkSkyLight(this);
         lightingProvider = createLightingProvider();
     }

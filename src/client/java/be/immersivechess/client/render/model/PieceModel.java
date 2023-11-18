@@ -342,8 +342,6 @@ public class PieceModel implements UnbakedModel {
                 if (beRenderer == null)
                     continue;
 
-
-
                 QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
                 vertexConsumer.pushPostTransform(translateTransform);
 

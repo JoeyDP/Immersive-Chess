@@ -4,6 +4,7 @@ import be.immersivechess.item.PieceContainer;
 import be.immersivechess.structure.StructureHelper;
 import be.immersivechess.structure.StructureResolver;
 import be.immersivechess.world.MiniatureBlockRenderView;
+import be.immersivechess.world.MiniatureWorld;
 import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -24,7 +25,7 @@ public abstract class StructureRenderedBlockEntity extends BlockEntity implement
     @Nullable
     private StructureTemplate structure;
     @Nullable
-    private MiniatureBlockRenderView miniWorld;
+    private MiniatureWorld miniWorld;
 
     public StructureRenderedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -83,7 +84,8 @@ public abstract class StructureRenderedBlockEntity extends BlockEntity implement
     public void setStructure(StructureTemplate structure) {
         if (!Objects.equals(this.structure, structure)) {
             this.structure = structure;
-            this.miniWorld = new MiniatureBlockRenderView(structure);
+            if (this.hasWorld())
+                this.miniWorld = new MiniatureWorld(getWorld(), structure);
             markDirty();
             updateBlockModel();
         }
@@ -101,7 +103,7 @@ public abstract class StructureRenderedBlockEntity extends BlockEntity implement
     }
 
     @Nullable
-    public MiniatureBlockRenderView getMiniWorld(){
+    public MiniatureWorld getMiniWorld(){
         return miniWorld;
     }
 
