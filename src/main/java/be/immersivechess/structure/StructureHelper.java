@@ -50,7 +50,7 @@ public class StructureHelper {
         for (StructureTemplate.StructureBlockInfo structureBlockInfo : blockInfos) {
             BlockPos blockPos = StructureTemplate.transform(placementData, structureBlockInfo.pos()).add(offset);
             BlockState blockState = structureBlockInfo.state().rotate(rotation);
-            StructureTemplate.StructureBlockInfo structureBlockInfo2 = new StructureTemplate.StructureBlockInfo(blockPos, blockState, structureBlockInfo.nbt() != null ? structureBlockInfo.nbt().copy() : null);
+            StructureTemplate.StructureBlockInfo structureBlockInfo2 = new StructureTemplate.StructureBlockInfo(blockPos, blockState, structureBlockInfo.nbt());
             blockInfos2.add(structureBlockInfo2);
         }
 

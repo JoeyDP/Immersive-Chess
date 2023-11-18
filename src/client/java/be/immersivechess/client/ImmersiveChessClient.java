@@ -6,6 +6,7 @@ import be.immersivechess.client.color.ColorProviders;
 import be.immersivechess.client.gui.ChessCaseScreen;
 import be.immersivechess.client.gui.ChessGameScreen;
 import be.immersivechess.client.render.block.entity.BoardBlockEntityRenderer;
+import be.immersivechess.client.render.block.entity.PieceStandBlockEntityRenderer;
 import be.immersivechess.client.render.block.entity.PieceStructureBlockEntityRenderer;
 import be.immersivechess.client.render.model.ModelProvider;
 import be.immersivechess.client.structure.ClientStructureResolver;
@@ -53,6 +54,8 @@ public class ImmersiveChessClient implements ClientModInitializer {
         // BlockEntityRenderers
         BlockEntityRendererFactories.register(BlockEntityTypes.PIECE_STRUCTURE_BLOCK_ENTITY_TYPE, PieceStructureBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypes.BOARD_BLOCK_ENTITY_TYPE, BoardBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypes.PIECE_STAND_BLOCK_ENTITY_TYPE, PieceStandBlockEntityRenderer::new);
+
 
         // Color providers
         ColorProviders.onInitializeClient();

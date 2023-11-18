@@ -62,6 +62,8 @@ import java.util.function.Supplier;
 @Environment(EnvType.CLIENT)
 public class PieceModel implements UnbakedModel {
 
+    public static final float SCALE = 1f / 8f;
+
     private final Piece piece;
 
     private final SpriteIdentifier spriteIdentifier = new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("minecraft:block/stone"));
@@ -92,7 +94,6 @@ public class PieceModel implements UnbakedModel {
         private final Piece piece;
         private final Sprite particles;
         private final ModelBakeSettings rotationContainer;
-        private static final float SCALE = 1f / 8f;
 
         private final ModelTransformation modelTransformation;
 
