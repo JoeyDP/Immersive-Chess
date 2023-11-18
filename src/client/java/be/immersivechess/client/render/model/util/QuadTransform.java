@@ -1,11 +1,10 @@
-package be.immersivechess.client.render.model;
+package be.immersivechess.client.render.model.util;
 
 import be.immersivechess.ImmersiveChess;
-import be.immersivechess.block.Blocks;
-import be.immersivechess.block.StandBlock;
-import be.immersivechess.block.entity.StructureRenderedBlockEntity;
 import be.immersivechess.client.color.TintMapper;
 import be.immersivechess.item.PieceContainer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.block.BlockState;
@@ -16,6 +15,7 @@ import org.joml.Vector3f;
 
 import java.util.Optional;
 
+@Environment(EnvType.CLIENT)
 public abstract class QuadTransform implements RenderContext.QuadTransform {
     private static abstract class PositionTransform extends QuadTransform {
         @Override

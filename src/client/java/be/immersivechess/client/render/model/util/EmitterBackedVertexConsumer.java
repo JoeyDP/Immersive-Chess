@@ -1,6 +1,8 @@
-package be.immersivechess.client.render.model;
+package be.immersivechess.client.render.model.util;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.render.FixedColorVertexConsumer;
@@ -8,12 +10,17 @@ import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.util.math.ColorHelper;
 
-class EmitterBackedVertexConsumer extends FixedColorVertexConsumer {
+@Environment(EnvType.CLIENT)
+public class EmitterBackedVertexConsumer extends FixedColorVertexConsumer implements TransformStack {
     int index = 0;
     QuadEmitter emitter;
 
     private final ObjectArrayList<RenderContext.QuadTransform> transformStack = new ObjectArrayList<>();
 
+    @Override
+    public ObjectArrayList<RenderContext.QuadTransform> getPostTransformStack(){
+        return transformStack;
+    }
 
     public EmitterBackedVertexConsumer(QuadEmitter emitter) {
         this.emitter = emitter;
@@ -64,21 +71,8 @@ class EmitterBackedVertexConsumer extends FixedColorVertexConsumer {
         index = (index + 1) % 4;
     }
 
-    public void pushTransform(RenderContext.QuadTransform transform){
-        transformStack.add(transform);
-    }
-
-    public void popTransform(){
-        transformStack.pop();
-    }
-
     private void emit(){
-        int i = transformStack.size() - 1;
-        while (i >= 0) {
-            if (!transformStack.get(i--).transform(emitter)) {
-                break;
-            }
-        }
+        postTransform(emitter);
         emitter.emit();
     }
 }
