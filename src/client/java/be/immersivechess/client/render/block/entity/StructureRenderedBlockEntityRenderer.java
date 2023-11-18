@@ -1,11 +1,7 @@
 package be.immersivechess.client.render.block.entity;
 
-import be.immersivechess.ImmersiveChess;
-import be.immersivechess.block.entity.PieceStructureBlockEntity;
 import be.immersivechess.block.entity.StructureRenderedBlockEntity;
-import be.immersivechess.client.ImmersiveChessClient;
 import be.immersivechess.client.render.model.PieceModel;
-import be.immersivechess.structure.StructureHelper;
 import be.immersivechess.world.MiniatureWorld;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,8 +12,6 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.state.property.Properties;
-import net.minecraft.structure.StructureTemplate;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
@@ -72,10 +66,6 @@ public class StructureRenderedBlockEntityRenderer<E extends StructureRenderedBlo
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-rotation), 4f, 0, 4f);
             matrices.translate(pos.getX(), pos.getY(), pos.getZ());
 
-            // Most BlockEntityRenderers don't do parts of their logic if the world is not present, though they often don't use it.
-            // TODO: provide miniature world
-//            be.setWorld(miniWorld);
-
             int localBlockLight = entity.getMiniWorld().getLightLevel(LightType.BLOCK, pos);
             int localSkyLight = entity.getMiniWorld().getLightLevel(LightType.SKY, pos);
             // Block light is based on max available. Skylight is propagated further.
@@ -83,8 +73,6 @@ public class StructureRenderedBlockEntityRenderer<E extends StructureRenderedBlo
 
             beRenderer.render(be, tickDelta, matrices, vertexConsumers, localLight, overlay);
             matrices.pop();
-
-//            be.setWorld(null);
         }
         matrices.pop();
         profiler.pop();
