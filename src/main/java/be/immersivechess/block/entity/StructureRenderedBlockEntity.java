@@ -3,19 +3,16 @@ package be.immersivechess.block.entity;
 import be.immersivechess.item.PieceContainer;
 import be.immersivechess.structure.StructureHelper;
 import be.immersivechess.structure.StructureResolver;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
+import be.immersivechess.world.MiniatureBlockRenderView;
+import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.datafixer.DataFixTypes;
-import net.minecraft.datafixer.Schemas;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registries;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
@@ -23,9 +20,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class StructureRenderedBlockEntity extends BlockEntity implements RenderAttachmentBlockEntity {
+public abstract class StructureRenderedBlockEntity extends BlockEntity implements RenderDataBlockEntity {
     @Nullable
     private StructureTemplate structure;
+    @Nullable
+    private MiniatureBlockRenderView miniWorld;
 
     public StructureRenderedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -84,6 +83,7 @@ public abstract class StructureRenderedBlockEntity extends BlockEntity implement
     public void setStructure(StructureTemplate structure) {
         if (!Objects.equals(this.structure, structure)) {
             this.structure = structure;
+            this.miniWorld = new MiniatureBlockRenderView(structure);
             markDirty();
             updateBlockModel();
         }
@@ -100,6 +100,11 @@ public abstract class StructureRenderedBlockEntity extends BlockEntity implement
         return structure;
     }
 
+    @Nullable
+    public MiniatureBlockRenderView getMiniWorld(){
+        return miniWorld;
+    }
+
     protected void updateBlockModel() {
         if (this.world == null)
             return;
@@ -108,7 +113,7 @@ public abstract class StructureRenderedBlockEntity extends BlockEntity implement
     }
 
     @Override
-    public @Nullable Object getRenderAttachmentData() {
+    public @Nullable Object getRenderData() {
         return getStructure();
     }
 

@@ -115,11 +115,11 @@ public class PieceModel implements UnbakedModel {
             modelTransformation.thirdPersonLeftHand.rotation.y -= 45;
             modelTransformation.thirdPersonRightHand.rotation.y -= 45;
 
-            modelTransformation.fixed.translation.y -= 0.2;
-            modelTransformation.fixed.translation.z -= 0.1;
+            modelTransformation.fixed.translation.y -= 0.2f;
+            modelTransformation.fixed.translation.z -= 0.1f;
 
             modelTransformation.gui.scale.mul(0.67f);
-            modelTransformation.gui.translation.y -= 0.15;
+            modelTransformation.gui.translation.y -= 0.15f;
 
             // Knights are rotated to the right in itemframe
             if (piece == Piece.WHITE_KNIGHT || piece == Piece.BLACK_KNIGHT) {
@@ -226,9 +226,7 @@ public class PieceModel implements UnbakedModel {
             QuadTransform scaleTransform = new QuadTransform.Scale(SCALE);
 
             // Build view of structure world
-            Map<BlockPos, BlockState> blockStates = StructureHelper.buildBlockStateMap(structure);
-            Map<BlockPos, BlockEntity> blockEntities = StructureHelper.buildBlockEntityMap(structure);
-            BlockRenderView world = new MiniatureBlockRenderView(blockStates, blockEntities);
+            MiniatureBlockRenderView world = new MiniatureBlockRenderView(structure);
 
             // QuadEmitter
             Renderer renderer = RendererAccess.INSTANCE.getRenderer();
@@ -236,14 +234,14 @@ public class PieceModel implements UnbakedModel {
             QuadEmitter emitter = builder.getEmitter();
 
             // Rendering
-            renderBlocks(blockStates, world, emitter, randomSupplier, rotationTransform, scaleTransform);
-            renderFluids(blockStates, world, emitter, rotationTransform, scaleTransform);
+            renderBlocks(world, emitter, randomSupplier, rotationTransform, scaleTransform);
+            renderFluids(world, emitter, rotationTransform, scaleTransform);
 //            renderBlockEntities(blockEntities, world, emitter, rotationTransform, scaleTransform);
 
             return builder.build();
         }
 
-        private void renderBlocks(Map<BlockPos, BlockState> blockStates, BlockRenderView world, QuadEmitter emitter, Supplier<Random> randomSupplier, QuadTransform rotationTransform, QuadTransform scaleTransform) {
+        private void renderBlocks(MiniatureBlockRenderView world, QuadEmitter emitter, Supplier<Random> randomSupplier, QuadTransform rotationTransform, QuadTransform scaleTransform) {
             Random random = randomSupplier.get();
             BlockModels blockModels = MinecraftClient.getInstance().getBakedModelManager().getBlockModels();
 
@@ -266,6 +264,7 @@ public class PieceModel implements UnbakedModel {
             renderContext.pushPostTransform(rotationTransform);
             renderContext.pushPostTransform(scaleTransform);
 
+            Map<BlockPos, BlockState> blockStates = world.getBlockStates();
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
                 BlockState bs = entry.getValue();
@@ -293,12 +292,13 @@ public class PieceModel implements UnbakedModel {
             }
         }
 
-        private void renderFluids(Map<BlockPos, BlockState> blockStates, BlockRenderView world, QuadEmitter emitter, QuadTransform rotationTransform, QuadTransform scaleTransform) {
+        private void renderFluids(MiniatureBlockRenderView world, QuadEmitter emitter, QuadTransform rotationTransform, QuadTransform scaleTransform) {
             // For fluids
             EmitterBackedVertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
             vertexConsumer.pushPostTransform(rotationTransform);
             vertexConsumer.pushPostTransform(scaleTransform);
 
+            Map<BlockPos, BlockState> blockStates = world.getBlockStates();
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
                 BlockState bs = entry.getValue();

@@ -1,10 +1,12 @@
 package be.immersivechess.world;
 
+import be.immersivechess.structure.StructureHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ColorHelper;
@@ -29,11 +31,23 @@ public class MiniatureBlockRenderView implements BlockRenderView, LightSourceVie
     private final ChunkSkyLight chunkSkyLight;
     private final LightingProvider lightingProvider;
 
+    public MiniatureBlockRenderView(StructureTemplate structure){
+        this(StructureHelper.buildBlockStateMap(structure), StructureHelper.buildBlockEntityMap(structure));
+    }
+
     public MiniatureBlockRenderView(Map<BlockPos, BlockState> blockStates, Map<BlockPos, BlockEntity> blockEntities) {
         this.blockStates = blockStates;
         this.blockEntities = blockEntities;
         chunkSkyLight = new ChunkSkyLight(this);
         lightingProvider = createLightingProvider();
+    }
+
+    public Map<BlockPos, BlockState> getBlockStates(){
+        return blockStates;
+    }
+
+    public Map<BlockPos, BlockEntity> getBlockEntities(){
+        return blockEntities;
     }
 
     private LightingProvider createLightingProvider() {
