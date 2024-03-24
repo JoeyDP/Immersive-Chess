@@ -61,6 +61,8 @@ public class Items {
     // Items
     public static final Item CHESS_CASE = register("chess_case", new ChessCase(new FabricItemSettings().maxCount(1)));
 
+    public static final Item TEST_ITEM = register("test_item", new TestItem(Blocks.BLANK_STAND, new FabricItemSettings().maxCount(64)));
+
     // BlockItems
     // Stands
     public static final Item BLANK_STAND = register(new StandItem(Blocks.BLANK_STAND, new FabricItemSettings()));
@@ -137,6 +139,7 @@ public class Items {
 
             // debug items
 //            content.add(DEBUG_ITEM);
+            content.add(TEST_ITEM);
         });
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(content -> {
