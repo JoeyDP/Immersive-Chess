@@ -61,13 +61,13 @@ public class StructureRenderedBlockEntityRenderer<E extends StructureRenderedBlo
             BlockEntityRenderer<BlockEntity> beRenderer = context.getRenderDispatcher().get(be);
             if (beRenderer == null) continue;
             if (beRenderer instanceof StructureRenderedBlockEntityRenderer) continue;      // no recursive block entities
-
+            
             matrices.push();
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-rotation), 4f, 0, 4f);
             matrices.translate(pos.getX(), pos.getY(), pos.getZ());
 
-            int localBlockLight = entity.getMiniWorld().getLightLevel(LightType.BLOCK, pos);
-            int localSkyLight = entity.getMiniWorld().getLightLevel(LightType.SKY, pos);
+            int localBlockLight = miniWorld.getLightLevel(LightType.BLOCK, pos);
+            int localSkyLight = miniWorld.getLightLevel(LightType.SKY, pos);
             // Block light is based on max available. Skylight is propagated further.
             int localLight = LightmapTextureManager.pack(Math.max(localBlockLight, globalBlockLight), Math.max(0, localSkyLight - 15 + globalSkyLight));
 
