@@ -61,7 +61,7 @@ public class StructureRenderedBlockEntityRenderer<E extends StructureRenderedBlo
             BlockEntityRenderer<BlockEntity> beRenderer = context.getRenderDispatcher().get(be);
             if (beRenderer == null) continue;
             if (beRenderer instanceof StructureRenderedBlockEntityRenderer) continue;      // no recursive block entities
-            
+
             matrices.push();
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-rotation), 4f, 0, 4f);
             matrices.translate(pos.getX(), pos.getY(), pos.getZ());
