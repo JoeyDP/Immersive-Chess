@@ -64,6 +64,8 @@ public class TestItem extends BlockItem {
 
     @Override
     public boolean onClicked(ItemStack slotStack, ItemStack handStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
+        // TODO: Quick stack takes everything with same damage value together rather than merging them
+
         // Let default code handle it
         if (!slotStack.isOf(handStack.getItem()))
             return false;
