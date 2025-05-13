@@ -75,3 +75,6 @@ Now you can play with your own pieces!
 ## Issues
 
 Please report issues as detailed as possible on Github: [https://github.com/JoeyDP/Immersive-Chess/issues/](https://github.com/JoeyDP/Immersive-Chess/issues).
+
+## Attribution
+- Includes the [JChess](https://github.com/ctabin/jchess) library as jar-in-jar, under the LGPL-2.1 license.
