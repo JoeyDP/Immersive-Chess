@@ -1,0 +1,21 @@
+# Change Log
+ 
+## [1.1.0]
+ 
+### Added
+- Lighting within miniature pieces
+- Rendering fluids inside miniatures
+- Rendering block entities inside miniatures
+- Accurate outline of miniatures
+
+ 
+### Changed
+- Prevent water from breaking structure blocks
+
+### Fixed
+- Update rook model (was missing block)
+
+
+## [1.0.0]
+
+Initial release
