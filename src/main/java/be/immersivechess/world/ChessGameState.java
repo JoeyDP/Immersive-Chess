@@ -241,7 +241,7 @@ public class ChessGameState extends PersistentState {
 
         BlockEntity blockEntity = world.getBlockEntity(destPos);
         if (blockEntity instanceof StructureRenderedBlockEntity pieceBlockEntity) {
-            pieceBlockEntity.setStructure(getStructure(piece));
+            pieceBlockEntity.setStructureNbt(getStructure(piece));
         }
     }
 
@@ -669,7 +669,7 @@ public class ChessGameState extends PersistentState {
 
         BlockEntity blockEntity = world.getBlockEntity(destPos);
         if (blockEntity instanceof StructureRenderedBlockEntity pieceBlockEntity) {
-            pieceBlockEntity.setStructure(getStructure(piece));
+            pieceBlockEntity.setStructureNbt(getStructure(piece));
         }
     }
 

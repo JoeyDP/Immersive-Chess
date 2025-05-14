@@ -2,7 +2,7 @@ package be.immersivechess.client.render.model;
 
 import be.immersivechess.ImmersiveChess;
 import be.immersivechess.block.Blocks;
-import be.immersivechess.client.color.TintMapper;
+import be.immersivechess.client.render.model.util.QuadTransform;
 import ch.astorm.jchess.core.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -105,22 +105,12 @@ public class BoardBlockModel implements UnbakedModel {
             materialFinder.blendMode(appearanceState.isOpaque() ? BlendMode.SOLID : BlendMode.TRANSLUCENT);
             RenderMaterial material = materialFinder.find();
             BakedModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(appearanceState);
+            QuadTransform tintRemap = new QuadTransform.TintRemap(appearanceState);
 
             for (Direction direction : Stream.concat(Arrays.stream(Direction.values()), Stream.of((Direction) null)).toList()) {
-
                 for (BakedQuad quad : model.getQuads(appearanceState, direction, random)) {
                     emitter.fromVanilla(quad, material, direction);
-
-                    // remap tintIndex to distinguish ColorProviders
-                    int tintIndex = emitter.colorIndex();
-                    if (tintIndex > -1) {
-                        // we do not expect the tintIndex to exceed our allocated capacity.
-                        if (tintIndex > TintMapper.CAPACITY)
-                            ImmersiveChess.LOGGER.warn("tintIndex exceeds allocated capacity. Some colors may get translated wrong.");
-
-                        int offset = TintMapper.INSTANCE.getTintOffset(appearanceState.getBlock());
-                        emitter.colorIndex(offset + tintIndex);
-                    }
+                    tintRemap.transform(emitter);
                     emitter.emit();
                 }
             }
@@ -158,8 +148,7 @@ public class BoardBlockModel implements UnbakedModel {
 
         @Override
         public boolean useAmbientOcclusion() {
-            // TODO: should depend on material, but would have to make different types of board blocks..
-            return false;
+            return true;
         }
 
         @Override

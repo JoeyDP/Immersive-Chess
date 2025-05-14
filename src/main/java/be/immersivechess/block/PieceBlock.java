@@ -3,12 +3,12 @@ package be.immersivechess.block;
 import be.immersivechess.block.entity.BlockEntityTypes;
 import be.immersivechess.block.entity.BoardBlockEntity;
 import be.immersivechess.block.entity.PieceBlockEntity;
-import be.immersivechess.block.entity.StructureRenderedBlockEntity;
 import be.immersivechess.item.Items;
 import be.immersivechess.item.PieceContainer;
 import be.immersivechess.item.PieceItem;
 import be.immersivechess.logic.MultiblockBoard;
 import be.immersivechess.logic.Piece;
+import be.immersivechess.structure.StructureOutlines;
 import be.immersivechess.world.ChessGameState;
 import ch.astorm.jchess.core.Color;
 import ch.astorm.jchess.core.Coordinate;
@@ -19,7 +19,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.server.world.ServerWorld;
@@ -317,13 +316,20 @@ public class PieceBlock extends BlockWithEntity implements PieceContainer {
     }
 
     @Override
+    public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
+        return super.onSyncedBlockEvent(state, world, pos, type, data);
+    }
+
+    @Override
     public boolean isShapeFullCube(BlockState state, BlockView world, BlockPos pos) {
         return false;
     }
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return outlineShape;
+        return world.getBlockEntity(pos, BlockEntityTypes.PIECE_BLOCK_ENTITY_TYPE)
+                .map(be -> StructureOutlines.getOrCreateOutline(be.getStructure(), state.get(FACING)).orElse(outlineShape))
+                .orElse(outlineShape);
     }
 
     @Override

@@ -3,6 +3,7 @@ package be.immersivechess.structure;
 import be.immersivechess.mixin.MixinStructureAccessor;
 import com.google.common.collect.Lists;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.BlockMirror;
@@ -31,6 +32,13 @@ public class StructureHelper {
         return blockInfoList.stream().collect(Collectors.toMap(s -> s.pos(), s -> s.state()));
     }
 
+    public static Map<BlockPos, BlockEntity> buildBlockEntityMap(StructureTemplate structure){
+        List<StructureTemplate.StructureBlockInfo> blockInfoList = getBlockInfoList(structure);
+        return blockInfoList.stream()
+                .filter(s -> s.nbt() != null)
+                .collect(Collectors.toMap(s -> s.pos(), s -> BlockEntity.createFromNbt(s.pos(), s.state(), s.nbt())));
+    }
+
     public static StructureTemplate rotate(StructureTemplate structure, BlockRotation rotation){
         // extract data from structureTemplate
         List<StructureTemplate.StructureBlockInfo> blockInfos = getBlockInfoList(structure);
@@ -42,7 +50,7 @@ public class StructureHelper {
         for (StructureTemplate.StructureBlockInfo structureBlockInfo : blockInfos) {
             BlockPos blockPos = StructureTemplate.transform(placementData, structureBlockInfo.pos()).add(offset);
             BlockState blockState = structureBlockInfo.state().rotate(rotation);
-            StructureTemplate.StructureBlockInfo structureBlockInfo2 = new StructureTemplate.StructureBlockInfo(blockPos, blockState, structureBlockInfo.nbt() != null ? structureBlockInfo.nbt().copy() : null);
+            StructureTemplate.StructureBlockInfo structureBlockInfo2 = new StructureTemplate.StructureBlockInfo(blockPos, blockState, structureBlockInfo.nbt());
             blockInfos2.add(structureBlockInfo2);
         }
 

@@ -1,11 +1,17 @@
 package be.immersivechess.client.render.model;
 
 import be.immersivechess.ImmersiveChess;
-import be.immersivechess.client.structure.StructureResolver;
+import be.immersivechess.client.color.TintMapper;
+import be.immersivechess.client.render.model.util.EmitterBackedBlockRenderContext;
+import be.immersivechess.client.render.model.util.EmitterBackedVertexConsumer;
+import be.immersivechess.client.render.model.util.QuadTransform;
+import be.immersivechess.client.render.model.util.TransformationHelper;
+import be.immersivechess.client.structure.ClientStructureResolver;
 import be.immersivechess.logic.Piece;
 import be.immersivechess.structure.StructureHelper;
-import com.google.common.collect.ImmutableList;
+import be.immersivechess.world.MiniatureBlockRenderView;
 import com.google.common.collect.MapMaker;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
@@ -14,63 +20,49 @@ import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
-import net.fabricmc.fabric.impl.client.indigo.renderer.aocalc.VanillaAoHelper;
-import net.minecraft.block.Block;
+import net.fabricmc.fabric.api.util.TriState;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.render.block.BlockModelRenderer;
 import net.minecraft.client.render.block.BlockModels;
-import net.minecraft.client.render.block.entity.LightmapCoordinatesRetriever;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.server.world.ChunkTaskPrioritySystem;
-import net.minecraft.server.world.ServerLightingProvider;
-import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.AffineTransformation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.util.thread.TaskExecutor;
-import net.minecraft.world.*;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.biome.ColorResolver;
-import net.minecraft.world.chunk.ChunkNibbleArray;
-import net.minecraft.world.chunk.ChunkProvider;
-import net.minecraft.world.chunk.EmptyChunk;
-import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.world.chunk.light.ChunkBlockLightProvider;
-import net.minecraft.world.chunk.light.ChunkSkyLightProvider;
-import net.minecraft.world.chunk.light.LightingProvider;
+import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
-import java.util.*;
-import java.util.concurrent.Executor;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public class PieceModel implements UnbakedModel {
+
+    public static final float SCALE = 1f / 8f;
 
     private final Piece piece;
 
@@ -102,8 +94,6 @@ public class PieceModel implements UnbakedModel {
         private final Piece piece;
         private final Sprite particles;
         private final ModelBakeSettings rotationContainer;
-        private static final boolean CULL = true;
-        private static final float SCALE = 1f / 8f;
 
         private final ModelTransformation modelTransformation;
 
@@ -125,11 +115,11 @@ public class PieceModel implements UnbakedModel {
             modelTransformation.thirdPersonLeftHand.rotation.y -= 45;
             modelTransformation.thirdPersonRightHand.rotation.y -= 45;
 
-            modelTransformation.fixed.translation.y -= 0.2;
-            modelTransformation.fixed.translation.z -= 0.1;
+            modelTransformation.fixed.translation.y -= 0.2f;
+            modelTransformation.fixed.translation.z -= 0.1f;
 
             modelTransformation.gui.scale.mul(0.67f);
-            modelTransformation.gui.translation.y -= 0.15;
+            modelTransformation.gui.translation.y -= 0.15f;
 
             // Knights are rotated to the right in itemframe
             if (piece == Piece.WHITE_KNIGHT || piece == Piece.BLACK_KNIGHT) {
@@ -191,8 +181,8 @@ public class PieceModel implements UnbakedModel {
             if (structure == null)
                 return;
 
-            Mesh mesh = getOrCreateMesh(structure, blockView, randomSupplier);
-            renderContext.meshConsumer().accept(mesh);
+            Mesh mesh = getOrCreateMesh(structure, randomSupplier);
+            mesh.outputTo(renderContext.getEmitter());
         }
 
         @Override
@@ -202,133 +192,172 @@ public class PieceModel implements UnbakedModel {
             if (structure == null)
                 return;
 
-            Mesh mesh = getOrCreateMesh(structure, MinecraftClient.getInstance().world, randomSupplier);
-            renderContext.meshConsumer().accept(mesh);
+            Mesh mesh = getOrCreateMesh(structure, randomSupplier);
+            mesh.outputTo(renderContext.getEmitter());
         }
 
         @Nullable
         private StructureTemplate getStructure(BlockRenderView blockView, BlockPos blockPos) {
             // Nbt of structure is passed
-            Object entityData = ((RenderAttachedBlockView) blockView).getBlockEntityRenderAttachment(blockPos);
+            Object entityData = blockView.getBlockEntityRenderData(blockPos);
 
             // null or unknown type -> return null which is empty structure
-            if (!(entityData instanceof NbtCompound structureNbt))
+            if (!(entityData instanceof StructureTemplate structure))
                 return null;
 
-            // empty nbt is also rendered as empty
-            if (structureNbt.isEmpty())
-                return null;
-
-            return StructureResolver.getStructure(structureNbt);
+            return structure;
         }
 
         private StructureTemplate getStructure(ItemStack itemStack) {
-            return StructureResolver.getStructure(itemStack);
+            return ClientStructureResolver.getStructure(itemStack);
         }
 
-        private Mesh getOrCreateMesh(StructureTemplate structure, BlockRenderView worldBlockView, Supplier<Random> randomSupplier) {
-            return meshCache.computeIfAbsent(structure, nbt -> createMesh(nbt, worldBlockView, randomSupplier));
+        private Mesh getOrCreateMesh(StructureTemplate structure, Supplier<Random> randomSupplier) {
+            return meshCache.computeIfAbsent(structure, nbt -> createMesh(nbt, randomSupplier));
         }
 
-        private Mesh createMesh(StructureTemplate structure, BlockRenderView worldBlockView, Supplier<Random> randomSupplier) {
+        private Mesh createMesh(StructureTemplate structure, Supplier<Random> randomSupplier) {
 //            ImmersiveChess.LOGGER.info("creating new mesh for piece " + piece);
 //            ImmersiveChess.LOGGER.info("cache size " + meshCache.size());
 
-            net.minecraft.util.math.random.Random random = randomSupplier.get();
-            RenderMaterial material = RendererAccess.INSTANCE.getRenderer().materialFinder().blendMode(BlendMode.TRANSLUCENT).find();
-            BlockModels blockModels = MinecraftClient.getInstance().getBakedModelManager().getBlockModels();
-
+            // Transformations
             AffineTransformation affineTransformation = rotationContainer.getRotation();
             QuadTransform rotationTransform = new QuadTransform.Rotate(affineTransformation.getLeftRotation());
             QuadTransform scaleTransform = new QuadTransform.Scale(SCALE);
 
-            Map<BlockPos, BlockState> blockStates = StructureHelper.buildBlockStateMap(structure);
-            BlockRenderView world = createBlockRenderView(worldBlockView, blockStates);
+            // Build view of structure world
+            MiniatureBlockRenderView world = new MiniatureBlockRenderView(structure);
+
+            // QuadEmitter
             Renderer renderer = RendererAccess.INSTANCE.getRenderer();
             MeshBuilder builder = renderer.meshBuilder();
             QuadEmitter emitter = builder.getEmitter();
 
+            // Rendering
+            renderBlocks(world, emitter, randomSupplier, rotationTransform, scaleTransform);
+            renderFluids(world, emitter, rotationTransform, scaleTransform);
+//            renderBlockEntities(blockEntities, world, emitter, rotationTransform, scaleTransform);
+
+            return builder.build();
+        }
+
+        private void renderBlocks(MiniatureBlockRenderView world, QuadEmitter emitter, Supplier<Random> randomSupplier, QuadTransform rotationTransform, QuadTransform scaleTransform) {
+            Random random = randomSupplier.get();
+            BlockModels blockModels = MinecraftClient.getInstance().getBakedModelManager().getBlockModels();
+
+            RenderMaterial material = RendererAccess.INSTANCE.getRenderer().materialFinder()
+                    .blendMode(BlendMode.TRANSLUCENT)
+                    .ambientOcclusion(TriState.DEFAULT)
+                    .emissive(false)
+                    .find();
+            QuadTransform materialTransform = new QuadTransform() {
+                @Override
+                public boolean transform(MutableQuadView quad) {
+                    quad.material(material);
+                    return true;
+                }
+            };
+
+            EmitterBackedBlockRenderContext renderContext = new EmitterBackedBlockRenderContext(emitter);
+
+            renderContext.pushPostTransform(materialTransform);
+            renderContext.pushPostTransform(rotationTransform);
+            renderContext.pushPostTransform(scaleTransform);
+
+            Map<BlockPos, BlockState> blockStates = world.getBlockStates();
             for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
                 BlockPos pos = entry.getKey();
                 BlockState bs = entry.getValue();
 
+                if (bs.isAir()) continue;
+                if (bs.getRenderType() != BlockRenderType.MODEL) continue;
+
                 QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
                 QuadTransform tintTransform = new QuadTransform.TintRemap(bs);
 
-                for (Direction direction : Stream.concat(Arrays.stream(Direction.values()), Stream.of((Direction) null)).toList()) {
-                    // update to blockState appearances, which may differ from actual block states (facades etc.)
-                    bs = bs.getAppearance(world, pos, direction, bs, null);
-                    BakedModel model = blockModels.getModel(bs);
+                renderContext.pushPostTransform(translateTransform);
+                renderContext.pushPostTransform(tintTransform);
 
-                    if (direction != null) {
-                        // culling is possible
-                        BlockPos neighbourPos = pos.offset(direction);
-                        if (CULL && !Block.shouldDrawSide(bs, world, pos, direction, neighbourPos)) continue;
-                    }
+                // TODO: Could add support for blockState appearances, which may differ from actual block states (facades etc.)
+                //  However, they depend on direction
+//                bs = bs.getAppearance(world, pos, direction, bs, null);
 
-                    for (BakedQuad quad : model.getQuads(bs, direction, random)) {
-                        emitter.fromVanilla(quad, material, null);       //  set cullFace to null because quads are not guaranteed to be on a face (not full block)
+                BakedModel model = blockModels.getModel(bs);
 
-                        translateTransform.transform(emitter);
-                        scaleTransform.transform(emitter);
-                        rotationTransform.transform(emitter);
-                        tintTransform.transform(emitter);
+                // Have RenderContext perform most of the rendering, we intercept the result and put it in the emitter.
+                renderContext.render(world, model, bs, pos, new MatrixStack(), null, true, random, 0, OverlayTexture.DEFAULT_UV);
 
-                        emitter.emit();
-                    }
-                }
+                renderContext.popPostTransform();
+                renderContext.popPostTransform();
             }
-            return builder.build();
         }
 
-        private BlockRenderView createBlockRenderView(BlockRenderView worldBlockView, Map<BlockPos, BlockState> blockStates) {
-            return new BlockRenderView() {
+        private void renderFluids(MiniatureBlockRenderView world, QuadEmitter emitter, QuadTransform rotationTransform, QuadTransform scaleTransform) {
+            // For fluids
+            EmitterBackedVertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
+            vertexConsumer.pushPostTransform(rotationTransform);
+            vertexConsumer.pushPostTransform(scaleTransform);
 
-                @Override
-                public float getBrightness(Direction direction, boolean shaded) {
-                    // This function is probably not called, but the return value makes sense at least.
-                    return worldBlockView.getBrightness(direction, shaded);
-                }
+            Map<BlockPos, BlockState> blockStates = world.getBlockStates();
+            for (Map.Entry<BlockPos, BlockState> entry : blockStates.entrySet()) {
+                BlockPos pos = entry.getKey();
+                BlockState bs = entry.getValue();
 
-                @Override
-                public LightingProvider getLightingProvider() {
-                    return null;
-                }
+                // Fluids are rendered by intercepting the quads rendered to a vertexconsumer and putting them in an emitter.
+                FluidState fluidState = bs.getFluidState();
+                if (fluidState.isEmpty())
+                    continue;
 
-                @Override
-                public int getColor(BlockPos pos, ColorResolver colorResolver) {
-                    // This function is never called, we return something sensible just in case.
-                    ImmersiveChess.LOGGER.debug("got unexpected call to getColor. Likely wrong value was returned");
-                    return worldBlockView.getColor(pos, colorResolver);
-                }
+                boolean isWater = fluidState.getFluid() == Fluids.WATER || fluidState.getFluid() == Fluids.FLOWING_WATER;
+                if (isWater)
+                    vertexConsumer.pushPostTransform(quad -> {
+                                quad.colorIndex(TintMapper.INSTANCE.WATER_COLOR_OFFSET);
+                                return true;
+                            }
+                    );
 
-                @Override
-                public int getHeight() {
-                    return 16;
-                }
+                MinecraftClient.getInstance().getBlockRenderManager().renderFluid(pos, world, vertexConsumer, bs, fluidState);
 
-                @Override
-                public int getBottomY() {
-                    return 0;
-                }
-
-                @Nullable
-                @Override
-                public BlockEntity getBlockEntity(BlockPos pos) {
-                    return null;
-                }
-
-                @Override
-                public BlockState getBlockState(BlockPos pos) {
-                    return blockStates.getOrDefault(pos, Blocks.VOID_AIR.getDefaultState());
-                }
-
-                @Override
-                public FluidState getFluidState(BlockPos pos) {
-                    return Fluids.EMPTY.getDefaultState();
-                }
-            };
+                if (isWater)
+                    vertexConsumer.popPostTransform();
+            }
         }
+
+        /**
+         * Rendering block entities statically
+         */
+        private void renderBlockEntities(Map<BlockPos, BlockEntity> blockEntities, BlockRenderView world, QuadEmitter emitter, QuadTransform rotationTransform, QuadTransform scaleTransform) {
+            EmitterBackedVertexConsumer vertexConsumer = new EmitterBackedVertexConsumer(emitter);
+            vertexConsumer.pushPostTransform(rotationTransform);
+            vertexConsumer.pushPostTransform(scaleTransform);
+
+            ImmersiveChess.LOGGER.info("thread: " + RenderSystem.isOnRenderThread());
+
+
+            for (Map.Entry<BlockPos, BlockEntity> entry : blockEntities.entrySet()) {
+                BlockPos pos = entry.getKey();
+                BlockEntity be = entry.getValue();
+
+                BlockEntityRenderer<BlockEntity> beRenderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(be);
+                if (beRenderer == null)
+                    continue;
+
+                QuadTransform translateTransform = new QuadTransform.Translate(pos.getX(), pos.getY(), pos.getZ());
+                vertexConsumer.pushPostTransform(translateTransform);
+
+                int light = WorldRenderer.getLightmapCoordinates(world, pos);
+
+                beRenderer.render(be, 0, new MatrixStack(), layer -> {
+                    // TODO: execute rendering on render thread
+                    // TODO: figure out start/end drawing calls for correct texture etc.
+
+//                            layer.startDrawing();
+                    return vertexConsumer;
+                }, light, OverlayTexture.DEFAULT_UV);
+                vertexConsumer.popPostTransform();
+            }
+        }
+
 
     }
 }

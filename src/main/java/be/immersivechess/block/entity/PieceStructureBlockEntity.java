@@ -24,7 +24,7 @@ import net.minecraft.world.event.PositionSource;
 import net.minecraft.world.event.listener.GameEventListener;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Set;
 
 public class PieceStructureBlockEntity extends DyedStructureRenderedBlockEntity implements GameEventListener {
     // keys for nbt data
@@ -49,7 +49,7 @@ public class PieceStructureBlockEntity extends DyedStructureRenderedBlockEntity 
     }
 
     public void updateStructure() {
-        setStructure(buildStructureNbtFromWorld());
+        setStructureNbt(buildStructureNbtFromWorld());
     }
 
     public ItemStack getContent() {
@@ -105,7 +105,7 @@ public class PieceStructureBlockEntity extends DyedStructureRenderedBlockEntity 
         return structureNbt;
     }
 
-    private static BlockRotation facingToRotation(Direction facing) {
+    public static BlockRotation facingToRotation(Direction facing) {
         return switch (facing) {
             case DOWN -> throw new IllegalStateException("Invalid facing direction of PieceStructureBlock: " + facing);
             case UP -> throw new IllegalStateException("Invalid facing direction of PieceStructureBlock: " + facing);
@@ -143,9 +143,12 @@ public class PieceStructureBlockEntity extends DyedStructureRenderedBlockEntity 
         return 10;
     }
 
+    private static final Set<GameEvent> LISTEN_EVENTS = Set.of(
+            GameEvent.BLOCK_PLACE, GameEvent.BLOCK_CHANGE, GameEvent.BLOCK_DESTROY,
+            GameEvent.FLUID_PLACE, GameEvent.FLUID_PICKUP);
     @Override
     public boolean listen(ServerWorld world, GameEvent event, GameEvent.Emitter emitter, Vec3d emitterPos) {
-        if (!List.of(GameEvent.BLOCK_PLACE, GameEvent.BLOCK_CHANGE, GameEvent.BLOCK_DESTROY).contains(event))
+        if (!LISTEN_EVENTS.contains(event))
             return false;
 
         BlockPos eventPos = BlockPos.ofFloored(emitterPos);

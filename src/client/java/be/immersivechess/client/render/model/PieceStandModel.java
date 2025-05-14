@@ -1,6 +1,8 @@
 package be.immersivechess.client.render.model;
 
 import be.immersivechess.ImmersiveChess;
+import be.immersivechess.client.render.model.util.QuadTransform;
+import be.immersivechess.client.render.model.util.TransformationHelper;
 import be.immersivechess.logic.Piece;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -120,7 +122,7 @@ public class PieceStandModel implements UnbakedModel {
 
         @Override
         public boolean useAmbientOcclusion() {
-            return false;
+            return true;
         }
 
         @Override

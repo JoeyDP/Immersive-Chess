@@ -69,7 +69,9 @@ jar {
 }
 
 loom {
+	splitEnvironmentSourceSets()
 	accessWidenerPath = file("src/main/resources/immersivechess.accesswidener")
+
 	runs {
 		datagen {
 			inherit(client)
@@ -81,8 +83,6 @@ loom {
 			runDir "build/datagen"
 		}
 	}
-
-	splitEnvironmentSourceSets()
 
 	mods {
 		"${mod_id}" {

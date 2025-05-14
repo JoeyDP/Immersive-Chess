@@ -1,28 +1,23 @@
 package be.immersivechess.block;
 
 import be.immersivechess.block.entity.BlockEntityTypes;
-import be.immersivechess.block.entity.PieceStandBlockEntity;
-import be.immersivechess.item.PieceContainer;
 import be.immersivechess.logic.Piece;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.item.BlockItem;
+import be.immersivechess.structure.StructureOutlines;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalFacingBlock;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 public class PieceStandBlock extends StandBlock {
 
@@ -98,8 +93,7 @@ public class PieceStandBlock extends StandBlock {
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        // default placement facing is inverted compared to Piece
-        // because stands should face the player whereas pieces should face away from you
+        // stands should face the player
         Direction playerFacing = ctx.getHorizontalPlayerFacing();
         Direction direction = ctx.shouldCancelInteraction() ? playerFacing : playerFacing.getOpposite();
         return getDefaultState().with(FACING, direction);
@@ -107,6 +101,10 @@ public class PieceStandBlock extends StandBlock {
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return outlineShape;
+        return world.getBlockEntity(pos, BlockEntityTypes.PIECE_STAND_BLOCK_ENTITY_TYPE)
+                .map(be -> StructureOutlines.getOrCreateOutline(be.getStructure(), state.get(FACING)).orElse(outlineShape))
+                .map(shape -> StructureOutlines.scale(shape, 0.5f).offset(0.25, 3f / 16f, 0.25))
+                .map(shape -> VoxelShapes.combine(StandBlock.OUTLINE_SHAPE, shape, BooleanBiFunction.OR))
+                .orElse(outlineShape);
     }
 }

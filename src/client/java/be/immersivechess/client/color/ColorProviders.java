@@ -1,5 +1,6 @@
 package be.immersivechess.client.color;
 
+import be.immersivechess.ImmersiveChess;
 import be.immersivechess.block.Blocks;
 import be.immersivechess.block.PieceStandBlock;
 import be.immersivechess.block.entity.DyedStructureRenderedBlockEntity;
@@ -42,9 +43,6 @@ public class ColorProviders {
     }
 
     private static class DyeColorProvider implements BlockColorProvider, ItemColorProvider{
-        // create dummy to access non-static functions that could have been static.
-        private static final DyeableItem DYEABLE_ITEM = new DyeableItem(){};
-
         @Override
         public int getColor(BlockState state, @Nullable BlockRenderView world, @Nullable BlockPos pos, int tintIndex) {
             if (tintIndex > 0 || world == null || pos == null)

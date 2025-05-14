@@ -1,6 +1,8 @@
 package be.immersivechess.block;
 
 import be.immersivechess.ImmersiveChess;
+import be.immersivechess.block.entity.BlockEntityTypes;
+import be.immersivechess.block.entity.StructureRenderedBlockEntity;
 import be.immersivechess.logic.Piece;
 import ch.astorm.jchess.core.Color;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -31,6 +33,7 @@ public class Blocks {
                     .create()
                     .mapColor(MapColor.GOLD)
                     .pistonBehavior(PistonBehavior.DESTROY)
+                    .notSolid()
                     .strength(0.3f)
                     .nonOpaque()));
 
@@ -52,8 +55,12 @@ public class Blocks {
         return register(piece.getIdentifier().withPrefixedPath("piece/"), new PieceBlock(
                 FabricBlockSettings
                         .create()
+                        .emissiveLighting((state, world, pos) -> world.getBlockEntity(pos, BlockEntityTypes.PIECE_BLOCK_ENTITY_TYPE)
+                                        .map(StructureRenderedBlockEntity::containsLightSource)
+                                        .orElse(false))
                         .mapColor(MapColor.CLEAR)
                         .pistonBehavior(PistonBehavior.BLOCK)
+                        .solid()
                         .hardness(0f)
                         .resistance(3600000.0f)
                         .nonOpaque()
@@ -66,8 +73,12 @@ public class Blocks {
         return register(piece.getIdentifier().withPrefixedPath("stand/"), new PieceStandBlock(
                 FabricBlockSettings
                         .create()
+                        .emissiveLighting((state, world, pos) -> world.getBlockEntity(pos, BlockEntityTypes.PIECE_STAND_BLOCK_ENTITY_TYPE)
+                                .map(StructureRenderedBlockEntity::containsLightSource)
+                                .orElse(false))
                         .mapColor(piece.getColor() == Color.WHITE ? MapColor.WHITE : MapColor.BLACK)
                         .pistonBehavior(PistonBehavior.DESTROY)
+                        .notSolid()
                         .strength(0.3f)
                         .nonOpaque(),
                 piece)
@@ -78,7 +89,14 @@ public class Blocks {
         return register(piece.getIdentifier().withPrefixedPath("structure/"), new PieceStructureBlock(
                 FabricBlockSettings
                         .create()
+                        .emissiveLighting((state, world, pos) -> world.getBlockEntity(pos, BlockEntityTypes.PIECE_STRUCTURE_BLOCK_ENTITY_TYPE)
+                                .map(StructureRenderedBlockEntity::containsLightSource)
+                                .orElse(false))
+                        .pistonBehavior(PistonBehavior.BLOCK)   // redundant because it already has an entity
+                        .solid()
                         .strength(3f)
+                        .nonOpaque()
+                        .ticksRandomly()
                         .dynamicBounds(),
                 piece));
     }
